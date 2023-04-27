@@ -5,8 +5,10 @@ import { Link } from "react-router-dom";
 const Login = () => {
   return (
     <>
-      <div className="bg-gray-200 grid h-screen place-items-center">
-        <div className="box px-10 py-5 border-gray-300 border-2 lg:w-1/3 sm:w-2/3 md:w-2/4 shadow-lg shadow-gray-600 hover:shadow-gray-900 rounded-md">
+      <div className="grid grid-cols-3 lg:grid-cols-3 md:grid-cols-3 xl:grid-cols-3 sm:grid-cols-2 h-screen">
+        <div className="partOne xl:col-span-2 md:col-span-1 lg:col-span-2 sm:col-span-1 hidden sm:hidden lg:block md:block xl:block"><img src="https://w0.peakpx.com/wallpaper/116/459/HD-wallpaper-microchip-neon-lines-black-background-chips-technology-backgrounds.jpg" alt="" className="object-cover w-full h-screen"/></div>
+        
+        <div className="partTwo col-span-3 xl:col-span-1 md:col-span-2 lg:col-span-1 sm:col-span-2 bg-blue-100 grid place-content-center sm:place-content-center px-10 py-5 border-gray-300 border-2 h-screen shadow-lg shadow-gray-600 hover:shadow-gray-900 rounded-md">
           <div className="head text-center">
             <h3 className="text-3xl content-center py-2 text-blue-600 font-bold border-b-2 border-gray-300 mb-5">
               Login

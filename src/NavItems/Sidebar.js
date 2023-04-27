@@ -7,7 +7,7 @@ import { SiFuturelearn } from 'react-icons/si'
 import { SiOpenaccess } from 'react-icons/si'
 import { CgProfile } from 'react-icons/cg'
 import Logo from '../assets/images/logo.svg'
-import HamburgerButton from './HamburgerMenuButton/HamburgerButton'
+import HamburgerButton from '../components/HamburgerMenuButton/HamburgerButton'
 
 const Sidebar = () => {
   const [open, setOpen] = useState(true)
