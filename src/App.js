@@ -11,4 +11,6 @@ function App() {
     )
 }
 
+export const loginCehck = false
+
 export default App

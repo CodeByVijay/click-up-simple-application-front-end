@@ -1,7 +1,9 @@
-import React from "react";
+import {React,useContext} from "react";
 import Toggle from "../components/ThemeToggle";
+import { MainContextState } from "../contexts/MainContext";
 
 const Navbar = () => {
+  const {users} = useContext(MainContextState)
   return (
     <nav className="bg-gray-100 border-gray-200 px-2 py-2.5 rounded dark:bg-gray-800">
       <div className="container flex justify-between items-center mx-auto pt-3">
@@ -9,7 +11,7 @@ const Navbar = () => {
 
         <div className="flex justify-end pr-4">
           <span className="text-xl font-medium mt-1 px-3 whitespace-nowrap dark:text-white">
-            Welcome <span className="text-green-800 dark:text-rose-600">Test</span>
+            Welcome <span className="text-green-800 dark:text-rose-600">{users.name}</span>
           </span>
           <Toggle />
         </div>

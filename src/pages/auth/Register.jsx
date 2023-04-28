@@ -34,7 +34,7 @@ const Register = () => {
       };
       try {
         const res = await axios.post(
-          "http://127.0.0.1:5000/api/register",
+          "http://127.0.0.1:5001/api/register",
           userData
         );
         if (res.data.result === "failed") {
