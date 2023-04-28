@@ -16,7 +16,7 @@ const Sidebar = () => {
 
   const Menus = [
     { title: 'Dashboard', path: '/dashboard', src: <AiFillPieChart /> },
-    { title: 'Course', path: '/course', src: <SiFuturelearn /> },
+    { title: 'Groups', path: '/groups', src: <SiFuturelearn /> },
     { title: 'Profile', path: '/profile', src: <CgProfile /> },
     { title: 'Sign-Out', path: '/logout', src: <SiOpenaccess />, gap: 'true' },
   ]

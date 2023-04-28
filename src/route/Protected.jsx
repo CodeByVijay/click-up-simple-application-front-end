@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
-import { loginCehck } from '../App'
+import { MainContextState } from "../contexts/MainContext";
 
 const Protected = () => {
+  const {loginCehck}= useContext(MainContextState)
   const navigate = useNavigate()
   useEffect(()=>{
     if(!loginCehck){

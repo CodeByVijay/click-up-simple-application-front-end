@@ -67,97 +67,100 @@ const Register = () => {
             <p className={`my-2 ${msgColor}`}>{msg}</p>
           </div>
           <div className="form">
-            <label
-              htmlFor="name"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Name
-            </label>
-            <div className="relative mb-6">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <FaUserAlt className="text-gray-600" />
+            <form onSubmit={(e) => handleRegister(e)}>
+              <label
+                htmlFor="name"
+                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Name
+              </label>
+              <div className="relative mb-6">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <FaUserAlt className="text-gray-600" />
+                </div>
+                <input
+                  type="text"
+                  id="name"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  placeholder="John Doe"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
               </div>
-              <input
-                type="text"
-                id="name"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
 
-            <label
-              htmlFor="username"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Email
-            </label>
-            <div className="relative mb-6">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <FaEnvelope className="text-gray-600" />
+              <label
+                htmlFor="username"
+                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Email
+              </label>
+              <div className="relative mb-6">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <FaEnvelope className="text-gray-600" />
+                </div>
+                <input
+                  type="text"
+                  id="username"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  placeholder="name@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
-              <input
-                type="text"
-                id="username"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="name@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
 
-            <label
-              htmlFor="password"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Password
-            </label>
-            <div className="relative mb-6">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <FaLock className="text-gray-600" />
+              <label
+                htmlFor="password"
+                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Password
+              </label>
+              <div className="relative mb-6">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <FaLock className="text-gray-600" />
+                </div>
+                <input
+                  type="password"
+                  id="password"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  placeholder="************"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
               </div>
-              <input
-                type="password"
-                id="password"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="************"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
 
-            <label
-              htmlFor="password2"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Confirm Password
-            </label>
-            <div className="relative mb-6">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <FaLock className="text-gray-600" />
+              <label
+                htmlFor="password2"
+                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Confirm Password
+              </label>
+              <div className="relative mb-6">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <FaLock className="text-gray-600" />
+                </div>
+                <input
+                  type="password"
+                  id="password2"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  placeholder="************"
+                  value={conPassword}
+                  onChange={(e) => setConPassword(e.target.value)}
+                />
               </div>
-              <input
-                type="password"
-                id="password2"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="************"
-                value={conPassword}
-                onChange={(e) => setConPassword(e.target.value)}
-              />
-            </div>
 
-            <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 w-full rounded-full"
-              onClick={handleRegister}
-            >
-              Register
-            </button>
+              <button
+                type="submit"
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 w-full rounded-full"
+                onClick={handleRegister}
+              >
+                Register
+              </button>
+            </form>
 
             <p className="font-light mt-3 text-center">
               If you have account. Please{" "}
               <Link
-                to="/"
+                to="/login"
                 className="font-bold text-blue-600 hover:text-blue-800"
               >
                 Login here..!

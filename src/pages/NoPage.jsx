@@ -1,11 +1,25 @@
-import React from 'react'
+import React, { useContext, useState } from "react";
+import { MainContextState } from "../contexts/MainContext";
+import Layout from "../components/Layout";
 
 const NoPage = () => {
+  const { loginCehck } = useContext(MainContextState);
+  // const [login,setLogin]= useState(loginCehck)
   return (
-    <div>
-      <h2>404 No Page Found.</h2>
-    </div>
-  )
-}
+    <>
+      {loginCehck ? (
+        <>
+          <Layout>
+            <h3>Page Not Found.</h3>
+          </Layout>
+        </>
+      ) : (
+        <>
+          <h3>Page Not Found.</h3>
+        </>
+      )}
+    </>
+  );
+};
 
-export default NoPage
+export default NoPage;

@@ -10,7 +10,7 @@ const Dashboard = () => {
   return (
     <>
       <Layout>
-        <div className="dark:text-white">Dashboard</div>
+        <div className="">Dashboard</div>
       </Layout>
     </>
   );

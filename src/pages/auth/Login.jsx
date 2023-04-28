@@ -4,30 +4,43 @@ import { FaEnvelope, FaLock } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { MainContextState } from "../../contexts/MainContext";
-import { loginCehck } from "../../App";
-const cookies = new Cookies()
+import validator from "validator";
+
+const cookies = new Cookies();
 
 const Login = () => {
-  const { users, setUsers } = useContext(MainContextState);
+  const { users, setUsers, loginCehck, setLoginCheck } =
+    useContext(MainContextState);
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [refToken, setRefToken] = useCookies(["accessToken", "refreshToken"]);
+
   const [msg, setMsg] = useState("");
   const [msgColor, setMsgColor] = useState("");
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault()
     try {
+      if(email==='' && password === ''){
+        setMsgColor("text-rose-600");
+        setMsg("Please enter email and password.");
+        return false;
+      }
+      if(!validator.isEmail(email)){
+        setMsgColor("text-rose-600");
+        setMsg("Please enter valid email.");
+        return false;
+      }
       await axios
         .post("http://localhost:5001/api/login", {
           email: email,
           password: password,
         })
         .then((resp) => {
-          // setEmail('')
-          // setPassword('')
+          setEmail("");
+          setPassword("");
           let expires = new Date();
-          // return console.log(expires.getTime())
 
           expires.setTime(expires.getTime() + 12 * 60 * 60 * 1000);
           setUsers(resp.data.user_data);
@@ -35,12 +48,12 @@ const Login = () => {
             path: "/",
             expires,
           });
-          // setRefToken("refresh_token", resp.data.refresh_token, {
-          //   path: "/",
-          //   expires,
-          // });
-          navigate('/dashboard')
-          loginCehck= true;
+          setRefToken("user_data", resp.data.user_data, {
+            path: "/",
+            expires,
+          });
+          navigate("/dashboard");
+          setLoginCheck(true);
         })
         .catch((error) => {
           setMsgColor("text-rose-600");
@@ -54,9 +67,6 @@ const Login = () => {
     }
   };
 
-  
-// const token = cookies.get('refresh_token')
-console.log(loginCehck)
   return (
     <>
       <div className="grid grid-cols-3 lg:grid-cols-3 md:grid-cols-3 xl:grid-cols-3 sm:grid-cols-2 h-screen">
@@ -76,6 +86,7 @@ console.log(loginCehck)
             <p className={`my-2 ${msgColor}`}>{msg}</p>
           </div>
           <div className="form">
+            <form onSubmit={(e)=>handleLogin(e)}>
             <label
               htmlFor="username"
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -116,12 +127,12 @@ console.log(loginCehck)
               />
             </div>
 
-            <button
+            <button type="submit"
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 w-full rounded-full"
-              onClick={handleLogin}
             >
               Login
             </button>
+            </form>
 
             <p className="font-light mt-3 text-center">
               If not have account. Please{" "}
