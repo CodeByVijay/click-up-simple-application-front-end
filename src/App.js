@@ -3,7 +3,7 @@ import Routers from "./route/Routers";
 import { Cookies } from "react-cookie";
 import { MainContextState } from "./contexts/MainContext";
 const cookies = new Cookies();
-
+export const base_path = 'http://localhost:5001/api/'
 function App() {
   const { setLoginCheck,setUsers } = useContext(MainContextState);
   useEffect(() => {

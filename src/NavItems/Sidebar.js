@@ -2,10 +2,11 @@ import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 import { BsArrowLeftCircle } from 'react-icons/bs'
+import { BiTask,BiGroup } from 'react-icons/bi'
 import { AiFillPieChart } from 'react-icons/ai'
-import { SiFuturelearn } from 'react-icons/si'
 import { SiOpenaccess } from 'react-icons/si'
 import { CgProfile } from 'react-icons/cg'
+import { FaTasks } from 'react-icons/fa'
 import Logo from '../assets/images/logo.svg'
 import HamburgerButton from '../components/HamburgerMenuButton/HamburgerButton'
 
@@ -16,7 +17,8 @@ const Sidebar = () => {
 
   const Menus = [
     { title: 'Dashboard', path: '/dashboard', src: <AiFillPieChart /> },
-    { title: 'Groups', path: '/groups', src: <SiFuturelearn /> },
+    { title: 'Tasks', path: '/my-tasks', src: <FaTasks /> },
+    { title: 'Projects', path: '/projects', src: <BiTask /> },
     { title: 'Profile', path: '/profile', src: <CgProfile /> },
     { title: 'Sign-Out', path: '/logout', src: <SiOpenaccess />, gap: 'true' },
   ]

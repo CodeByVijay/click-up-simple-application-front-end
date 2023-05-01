@@ -6,10 +6,9 @@ import axios from "axios";
 import { MainContextState } from "../../contexts/MainContext";
 import validator from "validator";
 
-const cookies = new Cookies();
 
 const Login = () => {
-  const { users, setUsers, loginCehck, setLoginCheck } =
+  const { setUsers, setLoginCheck } =
     useContext(MainContextState);
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
