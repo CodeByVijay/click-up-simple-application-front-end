@@ -10,9 +10,9 @@ import { base_path } from "../App";
 const Tasks = () => {
   const [showModal, setShowModal] = useState(false);
   const { users, userList, setUserList } = useContext(MainContextState);
-  const [taskName, setTaskName] = useState('');
-  const [taskDesc, setTaskDesc] = useState('');
-  const [taskExpDateTime, setTaskExpDateTime] = useState('');
+  const [taskName, setTaskName] = useState("");
+  const [taskDesc, setTaskDesc] = useState("");
+  const [taskExpDateTime, setTaskExpDateTime] = useState("");
 
   const [selectedUserList, setSelectedUserList] = useState([]);
   const [project, setProject] = useState("");
@@ -55,15 +55,14 @@ const Tasks = () => {
     setShowModal(false);
   };
   const handleTaskName = (e) => {
-    setTaskName(e.target.value)
+    setTaskName(e.target.value);
   };
   const handleTaskDescription = (e) => {
-    setTaskDesc(e.target.value)
+    setTaskDesc(e.target.value);
   };
-  const handleTaskExpDateTime = (e)=>{
-    setTaskExpDateTime(e.target.value)
-  
-  }
+  const handleTaskExpDateTime = (e) => {
+    setTaskExpDateTime(e.target.value);
+  };
   const options = userList
     ? userList.map((user) => ({
         value: user.id,
@@ -89,8 +88,28 @@ const Tasks = () => {
 
   const handleCreateTask = (e) => {
     const taskData = {
-      task_name:taskName,task_desc:taskDesc,task_assign:users.id,project:project.id
-    }
+      task_name: taskName,
+      task_desc: taskDesc,
+      task_assign: users.id,
+      task_assign_to: selectedUserList.value,
+      project_id: project.value,
+      exp_date_time: taskExpDateTime
+    };
+    axios
+      .post(`${base_path}create-task`,taskData)
+      .then((resp) => {
+        console.log(resp.data, "response");
+        // setUserList(resp.data.result);
+        setTaskName('')
+        setTaskDesc('')
+        setTaskExpDateTime('')
+        setSelectedUserList('')
+        setProject('')
+        setShowModal(false)
+      })
+      .catch((error) => {
+        console.log(error.response.data.msg);
+      });
   };
 
   return (
@@ -193,7 +212,6 @@ const Tasks = () => {
                       value={selectedUserList}
                       placeholder="Assign Task"
                     />
-
 
                     <div className="my-6">
                       <label
