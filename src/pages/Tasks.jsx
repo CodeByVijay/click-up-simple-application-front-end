@@ -8,62 +8,99 @@ import axios from "axios";
 import { base_path } from "../App";
 
 const Tasks = () => {
-    const [showModal, setShowModal] = useState(false);
-    const { users, userList, setUserList } = useContext(MainContextState);
-    const [selectedUserList, setSelectedUserList] = useState([]);
-    const [msg, setMsg] = useState("");
-    const [msgColor, setMsgColor] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const { users, userList, setUserList } = useContext(MainContextState);
+  const [taskName, setTaskName] = useState('');
+  const [taskDesc, setTaskDesc] = useState('');
+  const [taskExpDateTime, setTaskExpDateTime] = useState('');
 
-    useEffect(() => {
-        //   Get all users
-        axios
-          .get(`${base_path}user-list`)
-          .then((resp) => {
-            // console.log(resp.data.result, "response");
-            setUserList(resp.data.result);
-          })
-          .catch((error) => {
-            console.log(error.response.data.msg);
-          });
-      }, []);
+  const [selectedUserList, setSelectedUserList] = useState([]);
+  const [project, setProject] = useState("");
+  const [projectList, setProjectList] = useState([]);
+  const [msg, setMsg] = useState("");
+  const [msgColor, setMsgColor] = useState("");
 
-    const handleModelOpen = () => {
-        setMsg("");
-        setMsgColor("");
-        setSelectedUserList([]);
-        setShowModal(true);
-      };
-    
-      const handleCloseModal = () => {
-        setShowModal(false);
-      };
-    const handleTaskName = (e)=>{
+  useEffect(() => {
+    //   Get all users
+    axios
+      .get(`${base_path}user-list`)
+      .then((resp) => {
+        // console.log(resp.data.result, "response");
+        setUserList(resp.data.result);
+      })
+      .catch((error) => {
+        console.log(error.response.data.msg);
+      });
 
+    // Get All Projects
+    axios
+      .get(`${base_path}all-projects`)
+      .then((resp) => {
+        // console.log(resp.data.result, "response");
+        setProjectList(resp.data.result);
+      })
+      .catch((error) => {
+        console.log(error.response.data.msg);
+      });
+  }, []);
+
+  const handleModelOpen = () => {
+    setMsg("");
+    setMsgColor("");
+    setSelectedUserList([]);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+  const handleTaskName = (e) => {
+    setTaskName(e.target.value)
+  };
+  const handleTaskDescription = (e) => {
+    setTaskDesc(e.target.value)
+  };
+  const handleTaskExpDateTime = (e)=>{
+    setTaskExpDateTime(e.target.value)
+  
+  }
+  const options = userList
+    ? userList.map((user) => ({
+        value: user.id,
+        label: user.name,
+      }))
+    : [];
+
+  const projectOptions = projectList
+    ? projectList.map((project) => ({
+        value: project.id,
+        label: project.project_name,
+      }))
+    : [];
+
+  const handleUserSelect = (selectedOptions) => {
+    // console.log(selectedOptions)
+    setSelectedUserList(selectedOptions);
+  };
+  const handleProjectSelection = (selectedOptions) => {
+    // console.log(selectedOptions.value)
+    setProject(selectedOptions);
+  };
+
+  const handleCreateTask = (e) => {
+    const taskData = {
+      task_name:taskName,task_desc:taskDesc,task_assign:users.id,project:project.id
     }
-    const handleTaskDescription = (e)=>{
-        
-    }
-      const options = userList
-        ? userList.map((user) => ({
-            value: user.id,
-            label: user.name,
-          }))
-        : [];
-
-        const handleUserSelect = (selectedOptions) => {
-            // console.log(selectedOptions)
-            setSelectedUserList(selectedOptions);
-          };
-
-          const handleCreateTask =(e)=>{
-
-          }
+  };
 
   return (
     <div>
       <Layout>
         <div className="addTaskBtn">
-          <button className="flex gap-2 bg-green-300 rounded-md p-3 m-2" onClick={handleModelOpen}>
+          <button
+            className="flex gap-2 bg-green-600 hover:bg-green-700 text-white hover:text-gray-50 rounded-md p-3 m-2"
+            onClick={handleModelOpen}
+          >
             <FaPlus className="mt-1" /> Add New Task
           </button>
         </div>
@@ -103,7 +140,6 @@ const Tasks = () => {
           </div>
         </div>
 
-
         {showModal && (
           <>
             <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
@@ -125,6 +161,7 @@ const Tasks = () => {
                       className="rounded-none rounded-r-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       placeholder="Task Name"
                       onChange={(e) => handleTaskName(e)}
+                      value={taskName}
                     />
 
                     <input
@@ -133,17 +170,46 @@ const Tasks = () => {
                       className="rounded-none rounded-r-lg mt-2 bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       placeholder="Task Description"
                       onChange={(e) => handleTaskDescription(e)}
+                      value={taskDesc}
                     />
                     <Select
                       className="mt-2"
-                      closeMenuOnSelect={false}
-                      isMulti={true}
+                      closeMenuOnSelect={true}
+                      isMulti={false}
+                      searchable={true}
+                      options={projectOptions}
+                      onChange={(e) => handleProjectSelection(e)}
+                      value={project}
+                      placeholder="Select Project"
+                    />
+
+                    <Select
+                      className="mt-2"
+                      closeMenuOnSelect={true}
+                      isMulti={false}
                       searchable={true}
                       options={options}
                       onChange={handleUserSelect}
                       value={selectedUserList}
                       placeholder="Assign Task"
                     />
+
+
+                    <div className="my-6">
+                      <label
+                        className="block text-gray-700 text-sm font-bold mb-2"
+                        htmlFor="Task_date"
+                      >
+                        Expected Date
+                      </label>
+                      <input
+                        type="datetime-local"
+                        id="Task_date"
+                        className="rounded-none rounded-r-lg mt-2 bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        placeholder="Task Expected Date Time"
+                        onChange={(e) => handleTaskExpDateTime(e)}
+                      />
+                    </div>
                   </div>
                   {/*footer*/}
                   <div className="flex items-center justify-end p-6 border-t border-solid border-slate-200 rounded-b">
@@ -168,7 +234,6 @@ const Tasks = () => {
             <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
           </>
         )}
-
       </Layout>
     </div>
   );

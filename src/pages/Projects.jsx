@@ -98,7 +98,7 @@ const Projects = () => {
           <div className="grid grid-cols-1">
             <div className="text-right">
               <button
-                className="inline-flex gap-2 p-3 m-1 bg-green-600 rounded-lg text-white hover:bg-green-700 hover:text-gray-50"
+                className={`inline-flex gap-2 p-3 m-1 bg-green-600 rounded-lg text-white hover:bg-green-700 hover:text-gray-50`}
                 onClick={handleModelOpen}
               >
                 <FaPlus className="mt-1" />
