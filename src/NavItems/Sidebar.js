@@ -17,7 +17,7 @@ const Sidebar = () => {
 
   const Menus = [
     { title: 'Dashboard', path: '/dashboard', src: <AiFillPieChart /> },
-    { title: 'Tasks', path: '/my-tasks', src: <FaTasks /> },
+    { title: 'Tasks', path: '/task-list', src: <FaTasks /> },
     { title: 'Projects', path: '/projects', src: <BiTask /> },
     { title: 'Profile', path: '/profile', src: <CgProfile /> },
     { title: 'Sign-Out', path: '/logout', src: <SiOpenaccess />, gap: 'true' },
@@ -28,7 +28,7 @@ const Sidebar = () => {
       <div
         className={`${
           open ? 'w-60' : 'w-fit'
-        } hidden sm:block relative h-screen duration-300 bg-gray-100 border-r border-gray-200 dark:border-gray-600 p-5 dark:bg-slate-800`}
+        } hidden sm:block relative h-full duration-300 bg-gray-100 border-r border-gray-200 dark:border-gray-600 p-5 dark:bg-slate-800 `}
       >
         <BsArrowLeftCircle
           className={`${

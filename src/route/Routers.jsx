@@ -10,6 +10,7 @@ import Logout from "../pages/auth/Logout";
 import Projects from "../pages/Projects";
 import Project from "../pages/Project";
 import Tasks from "../pages/Tasks";
+import Task from "../pages/Task";
 
 const Routers = () => {
   return (
@@ -20,8 +21,8 @@ const Routers = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/projects" exact element={<Projects />} />
           <Route path="/project/:id" element={<Project />} />
-          <Route path="/my-tasks" element={<Tasks />} />
-          <Route path="/task/:id" element={<Tasks />} />
+          <Route path="/task-list" element={<Tasks />} />
+          <Route path="/task/:id" element={<Task />} />
           <Route path="/logout" element={<Logout />} />
         </Route>
 

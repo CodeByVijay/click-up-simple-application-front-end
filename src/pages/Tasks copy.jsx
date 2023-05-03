@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import Layout from "../components/Layout";
 import { FaPlus } from "react-icons/fa";
@@ -145,28 +145,6 @@ const Tasks = () => {
       });
   };
 
-  const handleDragEnd = (result) => {
-    const { source, destination, draggableId } = result;
-    if (!destination) {
-      return;
-    }
-    if (source.droppableId === destination.droppableId) {
-      const newTaskList = [...taskList];
-      const status = parseInt(source.droppableId);
-      const [removed] = newTaskList[status].splice(source.index, 1);
-      newTaskList[status].splice(destination.index, 0, removed);
-      setTaskList(newTaskList);
-    } else {
-      const sourceStatus = parseInt(source.droppableId);
-      const destStatus = parseInt(destination.droppableId);
-      const newTaskList = [...taskList];
-      const [removed] = newTaskList[sourceStatus].splice(source.index, 1);
-      removed.status = destStatus;
-      newTaskList[destStatus].splice(destination.index, 0, removed);
-      setTaskList(newTaskList);
-    }
-  };
-  
   // console.log(taskList, "taskList");
   return (
     <div>
@@ -179,124 +157,54 @@ const Tasks = () => {
             <FaPlus className="mt-1" /> Add New Task
           </button>
         </div>
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="grid grid-cols-3 gap-3">
-            <Droppable droppableId="incomplete">
-              {(provided) => (
-                <div
-                  className="assigned bg-yellow-100 rounded-md p-2 text-center h-full"
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                >
-                  <div className="head my-3 font-semibold">Assigned Task</div>
-                  <hr />
-                  {taskList.map((task, index) => {
-                    return (
-                      task.status === 0 && (
-                        <Draggable
-                          key={task.id}
-                          draggableId={task.id.toString()}
-                          index={index}
-                        >
-                          {(provided) => (
-                            <Link to={`/task/${task.id}`} key={task.id}>
-                              <div
-                                className="tasks my-2 p-3 bg-red-200 rounded-lg"
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                              >
-                                <h3>{task.task_name}</h3>
-                              </div>
-                            </Link>
-                          )}
-                        </Draggable>
-                      )
-                    );
-                  })}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-           
-            <Droppable droppableId="in-progress">
-              {(provided) => (
-                <div
-                  className="assigned bg-yellow-100 rounded-md p-2 text-center h-full"
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                >
-                  <div className="head my-3 font-semibold">Assigned Task</div>
-                  <hr />
-                  {taskList.map((task, index) => {
-                    return (
-                      task.status === 1 && (
-                        <Draggable
-                          key={task.id}
-                          draggableId={task.id.toString()}
-                          index={index}
-                        >
-                          {(provided) => (
-                            <Link to={`/task/${task.id}`} key={task.id}>
-                              <div
-                                className="tasks my-2 p-3 bg-red-200 rounded-lg"
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                              >
-                                <h3>{task.task_name}</h3>
-                              </div>
-                            </Link>
-                          )}
-                        </Draggable>
-                      )
-                    );
-                  })}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-
-
-            <Droppable droppableId="completed">
-              {(provided) => (
-                <div
-                  className="assigned bg-yellow-100 rounded-md p-2 text-center h-full"
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                >
-                  <div className="head my-3 font-semibold">Assigned Task</div>
-                  <hr />
-                  {taskList.map((task, index) => {
-                    return (
-                      task.status === 2 && (
-                        <Draggable
-                          key={task.id}
-                          draggableId={task.id.toString()}
-                          index={index}
-                        >
-                          {(provided) => (
-                            <Link to={`/task/${task.id}`} key={task.id}>
-                              <div
-                                className="tasks my-2 p-3 bg-red-200 rounded-lg"
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                              >
-                                <h3>{task.task_name}</h3>
-                              </div>
-                            </Link>
-                          )}
-                        </Draggable>
-                      )
-                    );
-                  })}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="assigned bg-yellow-100 rounded-md p-2 text-center h-full">
+            <div className="head my-3 font-semibold">Assigned Task</div>
+            <hr />
+            {taskList.map((task) => {
+              return (
+                task.status === 0 && (
+                  <Link to={`/task/${task.id}`} key={task.id}>
+                    <div className="tasks my-2 p-3 bg-red-200 rounded-lg">
+                      <h3>{task.task_name}</h3>
+                    </div>
+                  </Link>
+                )
+              );
+            })}
           </div>
-        </DragDropContext>
+          <div className="in-progress bg-green-100 rounded-md p-2 text-center h-screen">
+            <div className="head my-3 font-semibold">In Progress Task</div>
+            <hr />
+
+            {taskList.map((task) => {
+              return (
+                task.status === 1 && (
+                  <Link to={`/task/${task.id}`} key={task.id}>
+                    <div className="tasks my-2 p-3 bg-yellow-200 rounded-lg">
+                      <h3>{task.task_name}</h3>
+                    </div>
+                  </Link>
+                )
+              );
+            })}
+          </div>
+          <div className="completed bg-green-200 rounded-md p-2 text-center h-screen">
+            <div className="head my-3 font-semibold">Completed Task</div>
+            <hr />
+            {taskList.map((task) => {
+              return (
+                task.status === 2 && (
+                  <Link to={`/task/${task.id}`} key={task.id}>
+                    <div className="tasks my-2 p-3 bg-green-500 rounded-lg">
+                      <h3>{task.task_name}</h3>
+                    </div>
+                  </Link>
+                )
+              );
+            })}
+          </div>
+        </div>
 
         {showModal && (
           <>
