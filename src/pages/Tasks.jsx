@@ -147,6 +147,7 @@ const Tasks = () => {
         setTaskExpDateTime("");
         setSelectedUserList("");
         setProject("");
+        getTaskList();
         setTimeout(() => {
           setShowModal(false);
           setButtonTxt("Add Task");

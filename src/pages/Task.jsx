@@ -9,6 +9,7 @@ import { MainContextState } from "../contexts/MainContext";
 const Task = () => {
   const { users, userList, setUserList } = useContext(MainContextState);
   const [showStatusModal, setShowStatusModal] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
   const [msg, setMsg] = useState("");
   const [msgColor, setMsgColor] = useState("");
   const [task, setTask] = useState([]);
@@ -17,6 +18,12 @@ const Task = () => {
   const [selectedUserList, setSelectedUserList] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState([]);
   useEffect(() => {
+    getTask()
+    getUserList();
+  }, []);
+
+  // Get Task
+  const getTask = ()=>{
     axios
       .get(`${base_path}task/${id}`)
       .then((res) => {
@@ -26,14 +33,12 @@ const Task = () => {
           label: res.data.result[0].status.toUpperCase(),
         });
         setLoader(false);
-        console.log(selectedStatus);
+        // console.log(selectedStatus);
       })
       .catch((err) => {
         console.log(err, "Err");
       });
-
-    getUserList();
-  }, []);
+  }
 
   //   Get all users
   const getUserList = () => {
@@ -84,9 +89,16 @@ const Task = () => {
     setSelectedUserList([]);
     setShowStatusModal(true);
   };
+  const handleUserModelOpen = () => {
+    setMsg("");
+    setMsgColor("");
+    setSelectedUserList([]);
+    setShowUserModal(true);
+  };
 
   const handleCloseModal = () => {
     setShowStatusModal(false);
+    setShowUserModal(false);
   };
   const handleChangeStatus = (e) => {
     e.preventDefault();
@@ -97,15 +109,39 @@ const Task = () => {
     axios
       .post(`${base_path}task-status-change`, statusData)
       .then((res) => {
-        setMsg(res.data.msg)
-        setMsgColor("green-700")
-       setShowStatusModal(false)
+        setMsg(res.data.msg);
+        setMsgColor("green-700");
+        getTask()
+        setShowStatusModal(false);
       })
       .catch((error) => {
         console.log(error.response.data.msg);
       });
 
     // console.log(statusData)
+  };
+
+  const handleAssignTask = (e) => {
+    e.preventDefault();
+    const postData = {
+      task_id:id,
+      assignUserId:selectedUserList.value, // Assign to user id
+      assignUserName:selectedUserList.label, // Assign to user name
+      task_assign_user_name: users.name,
+      task_assign_user_id: users.id,
+    }
+    // console.log(postData)
+    axios
+    .post(`${base_path}task-assign`, postData)
+    .then((res) => {
+      setMsg(res.data.msg);
+      setMsgColor("green-700");
+      getTask()
+      setShowUserModal(false);
+    })
+    .catch((error) => {
+      console.log(error.response.data.msg);
+    });
   };
 
   return (
@@ -134,7 +170,10 @@ const Task = () => {
                       </button>
                     </div>
                     <div className="assignTask text-right">
-                      <button className="p-2 bg-green-600 hover:bg-green-700 text-white hover:text-gray-50 rounded-lg">
+                      <button
+                        className="p-2 bg-green-600 hover:bg-green-700 text-white hover:text-gray-50 rounded-lg"
+                        onClick={handleUserModelOpen}
+                      >
                         {" "}
                         Assign Task
                       </button>
@@ -373,14 +412,14 @@ const Task = () => {
         {/* Change Status Modal End */}
 
         {/* Assign Task Modal */}
-        {/* {showStatusModal && (
+        {showUserModal && (
           <>
             <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
               <div className="relative w-auto my-6 mx-auto max-w-3xl h-2/3 w-2/3 md:w-5/6 sm:w-5/6">
                 <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
                   <div className="flex items-start justify-between p-5 border-b border-solid border-slate-200 rounded-t w-full text-center">
                     <h3 className="text-3xl mb-2 font-semibold">
-                      Change Status
+                      Change Member
                     </h3>
                     <span className={`text-${msgColor}`}>{msg}</span>
                   </div>
@@ -407,7 +446,7 @@ const Task = () => {
                     <button
                       className="text-white bg-green-600 rounded-lg font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150 md:text-sm sm:text-sm text-xs"
                       type="button"
-                      onClick={(e) => handleChangeStatus(e)}
+                      onClick={(e) => handleAssignTask(e)}
                     >
                       Assign Task
                     </button>
@@ -417,7 +456,7 @@ const Task = () => {
             </div>
             <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
           </>
-        )} */}
+        )}
         {/* Assign Task Modal End */}
       </Layout>
     </>

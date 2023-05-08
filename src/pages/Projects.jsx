@@ -4,7 +4,7 @@ import { FaPlus, FaTrash } from "react-icons/fa";
 import Select from "react-select";
 import { MainContextState } from "../contexts/MainContext";
 import axios from "axios";
-import { base_path } from "../App";
+import { app_url, base_path } from "../App";
 import { Link } from "react-router-dom";
 
 const Projects = () => {
@@ -75,6 +75,7 @@ const Projects = () => {
       project_name: projectName,
       description: projectDesc,
       members: selectedUserList,
+      invite_link: app_url+'invite/'
     };
     axios
       .post(`${base_path}store-project`, data)
@@ -131,7 +132,9 @@ const Projects = () => {
                                       Team Members
                                     </span>
                                     <br />
-                                    {JSON.parse(val.members).length}
+                                    {val.members !== null
+                                      ? JSON.parse(val.members).length
+                                      : 0}
                                   </p>
                                 </div>
                                 <div className="manager">

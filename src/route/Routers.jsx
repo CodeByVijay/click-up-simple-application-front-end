@@ -11,6 +11,8 @@ import Projects from "../pages/Projects";
 import Project from "../pages/Project";
 import Tasks from "../pages/Tasks";
 import Task from "../pages/Task";
+import Invite from "../pages/Invite";
+import Loader from "../pages/loader/Loader";
 
 const Routers = () => {
   return (
@@ -30,6 +32,8 @@ const Routers = () => {
         <Route path="/" element={<Public />}>
           <Route path="login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/invite/:token" element={<Invite />} />
+          <Route path="/loader" element={<Loader />} />
         </Route>
 
         <Route path="*" element={<NoPage />} />
