@@ -75,7 +75,7 @@ const Projects = () => {
       project_name: projectName,
       description: projectDesc,
       members: selectedUserList,
-      invite_link: app_url+'invite/'
+      invite_link: app_url + "invite/",
     };
     axios
       .post(`${base_path}store-project`, data)
@@ -152,23 +152,25 @@ const Projects = () => {
                     ) : (
                       <>
                         <Link to={`/project/${val.id}`}>
-                          <div className="m-2 bg-green-100 border-2 border-gray-200 p-3 hover:bg-green-300 overflow-hidden">
+                          <div className="m-2 bg-green-100 border-2 border-gray-200 p-3 hover:bg-green-300 overflow-hidden h-full">
                             <div className="text-center">
-                              <span className="float-right text-rose-700 px-2 mx-2 cursor-pointer hover:text-lg">
+                              {/* <span className="float-right text-rose-700 px-2 mx-2 cursor-pointer hover:text-lg">
                                 <FaTrash />
-                              </span>
+                              </span> */}
                               <h4 className="font-black first-letter:capitalize ">
                                 {val.project_name}
                               </h4>
                               <hr className="my-2" />
-                              <div className="data my-5 grid grid-cols-2">
+                              <div className="data mt-10 grid grid-cols-2">
                                 <div className="memberCount">
                                   <p className="float-left">
                                     <span className="font-bold">
                                       Team Members
                                     </span>
                                     <br />
-                                    {JSON.parse(val.members).length}
+                                    {val.members !== null
+                                      ? JSON.parse(val.members).length
+                                      : 0}
                                   </p>
                                 </div>
                                 <div className="manager">
@@ -221,13 +223,14 @@ const Projects = () => {
                       onChange={(e) => handleProjectName(e)}
                     />
 
-                    <input
-                      type="text"
+                    <textarea
                       id="project_desc"
                       className="rounded-none rounded-r-lg mt-2 bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       placeholder="Project Description"
+                    
                       onChange={(e) => handleProjectDescription(e)}
-                    />
+                    >{projectDesc}</textarea>
+
                     <Select
                       className="mt-2"
                       closeMenuOnSelect={false}

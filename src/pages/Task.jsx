@@ -5,6 +5,9 @@ import axios from "axios";
 import { base_path } from "../App";
 import Select from "react-select";
 import { MainContextState } from "../contexts/MainContext";
+import Loader from "./loader/Loader";
+import userImage from "../assets/images/user.png";
+import { FaTrash } from "react-icons/fa";
 
 const Task = () => {
   const { users, userList, setUserList } = useContext(MainContextState);
@@ -17,13 +20,15 @@ const Task = () => {
   const [loader, setLoader] = useState(true);
   const [selectedUserList, setSelectedUserList] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState([]);
+  const [commentText, setCommentText] = useState("");
+  const [comments, setComments] = useState([]);
   useEffect(() => {
-    getTask()
+    getTask();
     getUserList();
   }, []);
 
   // Get Task
-  const getTask = ()=>{
+  const getTask = () => {
     axios
       .get(`${base_path}task/${id}`)
       .then((res) => {
@@ -32,13 +37,14 @@ const Task = () => {
           value: res.data.result[0].status,
           label: res.data.result[0].status.toUpperCase(),
         });
+        setComments(res.data.comments);
         setLoader(false);
         // console.log(selectedStatus);
       })
       .catch((err) => {
         console.log(err, "Err");
       });
-  }
+  };
 
   //   Get all users
   const getUserList = () => {
@@ -111,7 +117,7 @@ const Task = () => {
       .then((res) => {
         setMsg(res.data.msg);
         setMsgColor("green-700");
-        getTask()
+        getTask();
         setShowStatusModal(false);
       })
       .catch((error) => {
@@ -124,35 +130,59 @@ const Task = () => {
   const handleAssignTask = (e) => {
     e.preventDefault();
     const postData = {
-      task_id:id,
-      assignUserId:selectedUserList.value, // Assign to user id
-      assignUserName:selectedUserList.label, // Assign to user name
+      task_id: id,
+      assignUserId: selectedUserList.value, // Assign to user id
+      assignUserName: selectedUserList.label, // Assign to user name
       task_assign_user_name: users.name,
       task_assign_user_id: users.id,
-    }
+    };
     // console.log(postData)
     axios
-    .post(`${base_path}task-assign`, postData)
-    .then((res) => {
-      setMsg(res.data.msg);
-      setMsgColor("green-700");
-      getTask()
-      setShowUserModal(false);
-    })
-    .catch((error) => {
-      console.log(error.response.data.msg);
-    });
+      .post(`${base_path}task-assign`, postData)
+      .then((res) => {
+        setMsg(res.data.msg);
+        setMsgColor("green-700");
+        getTask();
+        setShowUserModal(false);
+      })
+      .catch((error) => {
+        console.log(error.response.data.msg);
+      });
   };
 
+  // Comment
+  const handleComment = (e) => {
+    setCommentText(e.target.value);
+  };
+  const handlePostComment = () => {
+    const postData = {
+      task_id: Number(id),
+      user_id: users.id,
+      comment: commentText,
+    };
+    
+    axios
+      .post(`${base_path}store-comment`, postData)
+      .then((resp) => {
+        getTask();
+        setCommentText("")
+        setMsg(resp.data.msg);
+        setMsgColor('green-600')
+      })
+      .catch((error) => {
+        console.log(error.response.data.msg);
+      });
+  };
   return (
     <>
+      {loader && <Loader />}
       <Layout>
         {!loader && (
           <>
             <div className="container">
               <div className="grid grid-cols-3 gap-3">
                 <div
-                  className={`taskGrid col-span-2 h-full bg-gray-100 px-10 py-5 hover:bg-gray-200 rounded-lg`}
+                  className={`taskGrid col-span-2 h-full bg-gray-100 px-10 py-5 hover:bg-gray-200 rounded-lg dark:bg-[#1e293b] dark:text-gray-100 dark:border-2 dark:border-gray-100`}
                 >
                   <div className="text-center font-black text-lg border-blue-300 border-b-2 p-2 hover:border-blue-400 my-4">
                     <h4>Task Details</h4>
@@ -229,32 +259,38 @@ const Task = () => {
                         <span>{task[0].status}</span>
                       </div>
                     </div>
-
                     <div className="grid grid-cols-1 my-2">
                       <div>
                         <label className="font-black">Comments : </label>
                       </div>
                     </div>
+                    {comments.map((val) => {
+                      return (
+                        <>
+                          <div
+                            key={val.comment_id}
+                            className="grid grid-cols-1 rounded-lg bg-blue-50 border-blue-100 border-2 m-2 dark:bg-[#1e293b] dark:text-gray-100"
+                          >
+                              {/* <span className="text-right m-1 p-1"><FaTrash/></span> */}
 
-                    <div className="grid grid-cols-1 rounded-lg bg-blue-50 border-blue-100 border-2 m-2">
-                      <div className="flex p-3 m-4">
-                        <div className="avatar rounded-xl shadow-xl shadow-blue-800">
-                          <img
-                            src="https://cdn.pixabay.com/photo/2018/08/28/12/41/avatar-3637425_1280.png"
-                            alt=""
-                            width={`48px`}
-                            height={`48px`}
-                          />
-                        </div>
-                        <div className="name mt-4 ml-4 font-medium">
-                          <p>KHJUdsfsdfsdklhfdslkf</p>
-                        </div>
-                      </div>
-                      <div className="comments px-5">
-                        fdjsdf sdfkjsdf sdf;sdf sdfsdf;lsdf slfjdsf sdflsdfjsdf
-                        lsdfjsd
-                      </div>
-                    </div>
+                            <div className="flex p-3 m-4">
+                              <div className="avatar rounded-xl shadow-xl shadow-blue-800">
+                                <img
+                                  src={userImage}
+                                  alt=""
+                                  width={`48px`}
+                                  height={`48px`}
+                                />
+                              </div>
+                              <div className="name mt-4 ml-4 font-medium">
+                                <p>{val.user_name}</p>
+                              </div>
+                            </div>
+                            <div className="comments px-5 py-2">{val.comment}</div>
+                          </div>
+                        </>
+                      );
+                    })}
 
                     <div className="grid grid-cols-1 my-2">
                       <div>
@@ -269,18 +305,32 @@ const Task = () => {
                           rows="4"
                           className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                           placeholder="Write your comment here..."
-                        ></textarea>
+                          onChange={(e) => handleComment(e)}
+                          value={commentText}
+                        >
+                          {commentText}
+                        </textarea>
                       </div>
                       <div className="button text-right">
-                        <button className="p-3 m-2 bg-green-600 hover:bg-green-700 text-white hover:text-gray-50 rounded-lg">
-                          Comment
-                        </button>
+                        {(task[0].project_manager_id === users.id ||
+                          JSON.parse(task[0]?.project_members || "[]").some(
+                            (member) => member.value === users.id
+                          )) && (
+                          <>
+                            <button
+                              className="p-3 m-2 bg-green-600 hover:bg-green-700 text-white hover:text-gray-50 rounded-lg"
+                              onClick={handlePostComment}
+                            >
+                              Comment
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
                 <div
-                  className={`projectGrid h-full bg-rose-100 rounded-lg px-10 py-5`}
+                  className={`projectGrid h-full bg-rose-100 rounded-lg px-10 py-5 dark:bg-[#1e293b] dark:text-gray-100 dark:border-2 dark:border-gray-100`}
                 >
                   <div className="text-center font-black text-lg border-blue-300 border-b-2 p-2 my-4">
                     <h4>Project Details</h4>
@@ -339,17 +389,21 @@ const Task = () => {
                         </label>
                       </div>
                       <div className="text-sm">
-                        <ol className="list-inside list-decimal">
-                          {JSON.parse(task[0].project_members).map(
-                            (member, i) => {
-                              return (
-                                <>
-                                  <li key={i}>{member.label}</li>
-                                </>
-                              );
-                            }
-                          )}
-                        </ol>
+                        {task[0].project_members !== null ? (
+                          <ol className="list-inside list-decimal">
+                            {JSON.parse(task[0].project_members).map(
+                              (member, i) => {
+                                return (
+                                  <>
+                                    <li key={i}>{member.label}</li>
+                                  </>
+                                );
+                              }
+                            )}
+                          </ol>
+                        ) : (
+                          <>No Member</>
+                        )}
                       </div>
                     </div>
                   </div>

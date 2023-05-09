@@ -1,21 +1,29 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Layout from "../components/Layout";
 import Select from "react-select";
 import axios from "axios";
-import { base_path } from "../App";
+import { app_url, base_path } from "../App";
 import { FaPencilAlt, FaPlus, FaTrash } from "react-icons/fa";
 import { MainContextState } from "../contexts/MainContext";
+import Loader from "./loader/Loader";
 
 const Project = () => {
+  const navigate = useNavigate();
+  const [loader, setLoader] = useState(false);
   const { users, userList, setUserList } = useContext(MainContextState);
   const [msg, setMsg] = useState("");
   const [msgColor, setMsgColor] = useState("");
   const { id } = useParams();
   const [project, setProject] = useState([]);
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const [showProjectEditModal, setShowProjectEditModal] = useState(false);
   const [selectedUserList, setSelectedUserList] = useState([]);
+  const [selectedProjectStatus, setSelectedProjectStatus] = useState([]);
   const [joinedMembers, setJoinedMembers] = useState([]);
+
+  const [projectName, setProjectName] = useState("");
+  const [projectDesc, setProjectDesc] = useState("");
 
   const options = userList
     ? userList.map((user) => ({
@@ -23,6 +31,17 @@ const Project = () => {
         label: user.name,
       }))
     : [];
+
+  const projectStatus = [
+    {
+      value: 0,
+      label: "Progress",
+    },
+    {
+      value: 1,
+      label: "Complete",
+    },
+  ];
 
   useEffect(() => {
     getProject();
@@ -33,26 +52,42 @@ const Project = () => {
       ...provided,
       color: state.isDisabled ? "gray" : "black",
       // backgroundColor:state.isDisabled ? "blue" : "white",
-    })
+    }),
   };
 
-  const getProject = async () => {
-    await axios
+  const getProject = () => {
+    setLoader(true);
+    axios
       .post(`${base_path}project`, { id: id })
       .then((resp) => {
-        const members = JSON.parse(resp.data.result[0].members);
-        const memberIds = members.map((member) => member.value);
+        const members = JSON.parse(resp?.data?.result[0]?.members);
+        const memberIds = members?.map((member) => member.value);
+
+        if (resp?.data?.result[0]?.status === 1) {
+          setSelectedProjectStatus({
+            value: 1,
+            label: "Complete",
+          });
+        } else {
+          setSelectedProjectStatus({
+            value: 0,
+            label: "Progress",
+          });
+        }
 
         setJoinedMembers(memberIds);
-        setProject(resp.data.result);
+        setLoader(false);
+        if (resp?.data?.result) {
+          setProject(resp.data.result);
+        }
       })
       .catch((error) => {
-        console.log(error.response.data.msg);
+        console.log(error.response?.data?.msg);
       });
   };
 
   const isOptionDisabled = (option) => {
-    return joinedMembers.includes(option.value);
+    return joinedMembers?.includes(option.value);
   };
 
   const handleAddMemberModelOpen = () => {
@@ -64,34 +99,156 @@ const Project = () => {
 
   const handleCloseModal = () => {
     setShowAddMemberModal(false);
+    setShowProjectEditModal(false);
   };
   const handleUserSelect = (selectedOptions) => {
     setSelectedUserList(selectedOptions);
   };
 
+  const handleProjectStatus = (selectedOptions) => {
+    setSelectedProjectStatus(selectedOptions);
+  };
+
   const handleMember = (e, member_id) => {
-    console.log(member_id);
+    e.preventDefault();
+    const postData = {
+      project_id: project[0].id,
+      admin_id: project[0].admin_id,
+      member_id: member_id,
+    };
+    // console.log(postData);
+    axios
+      .post(`${base_path}remove-project-member`, postData)
+      .then((resp) => {
+        getProject();
+        setMsg(resp.data.msg);
+        setMsgColor("green-600");
+      })
+      .catch((err) => {
+        setMsg(err.response.data.msg);
+        setMsgColor("rose-600");
+      });
   };
   const handleAddMemberProject = (e) => {
     e.preventDefault();
-    console.log("clicked");
+    setLoader(true);
+
+    // console.log(project,"Project")
+    const postData = {
+      project_id: project[0].id,
+      admin: project[0].admin_id,
+      project_name: project[0].project_name,
+      members: selectedUserList,
+      invite_link: app_url + "invite/",
+    };
+
+    axios
+      .post(`${base_path}invite-new-member`, postData)
+      .then((resp) => {
+        setMsg(resp.data.msg);
+        setMsgColor("green-600");
+        getProject();
+        setTimeout(() => {
+          setShowAddMemberModal(false);
+          setLoader(false);
+        }, 1000);
+      })
+      .catch((err) => {
+        setMsg(err.response.data.msg);
+        setMsgColor("rose-600");
+      });
   };
+
+  // Edit Project
+  const hanleProjectEditModal = () => {
+    console.log(project);
+    setProjectName(project[0].project_name);
+    setProjectDesc(project[0].description);
+    setShowProjectEditModal(true);
+  };
+  const handleProjectName = (e) => {
+    setProjectName(e.target.value);
+  };
+  const handleProjectDescription = (e) => {
+    setProjectDesc(e.target.value);
+  };
+
+  const handleEditProject = () => {
+    setLoader(true);
+    const postData = {
+      project_id: project[0].id,
+      admin_id: project[0].admin_id,
+      project_name: projectName,
+      description: projectDesc,
+      status: selectedProjectStatus.value,
+    };
+
+    axios
+      .post(`${base_path}edit-project`, postData)
+      .then((resp) => {
+        setMsg(resp.data.msg);
+        setMsgColor("green-600");
+        getProject();
+        setTimeout(() => {
+          setShowProjectEditModal(false);
+          setLoader(false);
+        }, 1000);
+      })
+      .catch((err) => {
+        setMsg(err.response.data.msg);
+        setMsgColor("rose-600");
+      });
+  };
+
+  // Delete Project
+  const handleProjectDelete = () => {
+    const project_id = project[0].id;
+    setLoader(true);
+    axios
+      .get(`${base_path}delete-project/${project_id}`)
+      .then((resp) => {
+        setTimeout(() => {
+          navigate("../projects");
+          setLoader(false);
+        }, 1500);
+      })
+      .catch((err) => {
+        setMsg(err.response.data.msg);
+        setMsgColor("rose-600");
+      });
+  };
+
   return (
     <>
+      {loader && <Loader />}
       <Layout>
-        <div className="container">
+        <div className="container dark:text-gray-100 dark:bg-[#1e293b]">
           <div className="head my-3 text-center">
+            <span
+              className="float-right p-2 bg-rose-500 mr-3 hover:bg-rose-600 text-white rounded-lg"
+              title="Delete This Project"
+              onClick={handleProjectDelete}
+            >
+              <FaTrash />
+            </span>
             <h4 className="font-black text-lg">
               {project.length > 0 ? project[0].project_name : ""}
             </h4>
+
+            <p>
+              <span className={`text-${msgColor}`}>{msg}</span>
+            </p>
           </div>
 
           <hr />
           <div className="grid grid-cols-2 gap-4 h-full">
-            <div className="partOne bg-gray-50 m-3 ">
+            <div className="partOne bg-gray-50 m-3 dark:bg-[#1e293b] dark:border-2 dark:border-gray-100">
               <div className="partOneHead my-4 font-bold pl-4">
                 Project Info
-                <button className="float-right bg-blue-500 text-white p-2 rounded-lg mr-3 hover:bg-blue-700">
+                <button
+                  className="float-right bg-blue-500 text-white p-2 rounded-lg mr-3 hover:bg-blue-700"
+                  onClick={hanleProjectEditModal}
+                >
                   <FaPencilAlt />
                 </button>
               </div>
@@ -113,7 +270,7 @@ const Project = () => {
                 </p>
               </div>
             </div>
-            <div className="partTwo bg-gray-50 m-3">
+            <div className="partTwo bg-gray-50 m-3 dark:bg-[#1e293b] dark:border-2 dark:border-white">
               <div className="partTwoHead my-4 font-bold pl-4">
                 Members
                 <button
@@ -135,14 +292,21 @@ const Project = () => {
                           <li key={i + 1} className="m-2">
                             <div className="items grid grid-cols-2">
                               <p>{val.label}</p>
-                              <p className="text-right mr-5">
-                                <button
-                                  className="bg-rose-500 text-white p-2 rounded-lg mb-2"
-                                  onClick={(e) => handleMember(e, val.value)}
-                                >
-                                  <FaTrash />
-                                </button>
-                              </p>
+
+                              {users.id === project[0].admin_id && (
+                                <>
+                                  <p className="text-right mr-5">
+                                    <button
+                                      className="bg-rose-500 text-white p-2 rounded-lg mb-2"
+                                      onClick={(e) =>
+                                        handleMember(e, val.value)
+                                      }
+                                    >
+                                      <FaTrash />
+                                    </button>
+                                  </p>
+                                </>
+                              )}
                             </div>
                           </li>
                           <hr className="w-full" />
@@ -167,7 +331,7 @@ const Project = () => {
                 {/*header*/}
                 <div className="flex items-start justify-between p-5 border-b border-solid border-slate-200 rounded-t w-full text-center">
                   <h3 className="text-3xl mb-2 font-semibold">
-                    Add New Member
+                    Invite New Member
                   </h3>
                   <span className={`text-${msgColor}`}>{msg}</span>
                 </div>
@@ -213,6 +377,86 @@ const Project = () => {
       )}
 
       {/* Project add member modal end */}
+
+      {/*  Project Edit Modal */}
+
+      {showProjectEditModal && (
+        <>
+          <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
+            <div className="relative w-auto my-6 mx-auto max-w-3xl h-2/3 w-2/3 md:w-5/6 sm:w-5/6">
+              {/*content*/}
+              <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
+                {/*header*/}
+                <div className="flex items-start justify-between p-5 border-b border-solid border-slate-200 rounded-t w-full text-center">
+                  <h3 className="text-3xl mb-2 font-semibold">Edit Project</h3>
+                  <span className={`text-${msgColor}`}>{msg}</span>
+                </div>
+                {/*body*/}
+                <div className="relative p-6 flex-auto">
+                  <input
+                    type="text"
+                    id="Project_Name"
+                    className="rounded-none rounded-r-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    placeholder="Project Name"
+                    value={projectName}
+                    onChange={(e) => handleProjectName(e)}
+                  />
+                  {/* <input
+                    type="text"
+                    id="project_desc"
+                    className="rounded-none rounded-r-lg mt-2 bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    placeholder="Project Description"
+                    value={projectDesc}
+                    onChange={(e) => handleProjectDescription(e)}
+                  /> */}
+
+                  <textarea
+                    id="project_desc"
+                    className="rounded-none rounded-r-lg mt-2 bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    placeholder="Project Description"
+                    onChange={(e) => handleProjectDescription(e)}
+                  >
+                    {projectDesc}
+                  </textarea>
+                </div>
+
+                <div className="relative px-6 pb-6 flex-auto">
+                  <Select
+                    className="mt-2"
+                    closeMenuOnSelect={true}
+                    isClearable
+                    options={projectStatus}
+                    onChange={handleProjectStatus}
+                    value={selectedProjectStatus}
+                    placeholder="Select Project Status"
+                    noOptionsMessage={() => "No data found."}
+                  />
+                </div>
+                {/*footer*/}
+                <div className="flex items-center justify-end p-6 border-t border-solid border-slate-200 rounded-b">
+                  <button
+                    className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150 md:text-sm sm:text-sm text-xs"
+                    type="button"
+                    onClick={() => handleCloseModal()}
+                  >
+                    Close
+                  </button>
+                  <button
+                    className="text-white bg-green-600 rounded-lg font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150 md:text-sm sm:text-sm text-xs"
+                    type="button"
+                    onClick={(e) => handleEditProject(e)}
+                  >
+                    Update
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
+        </>
+      )}
+
+      {/* Project Edit modal end */}
     </>
   );
 };

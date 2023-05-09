@@ -9,8 +9,10 @@ import Select from "react-select";
 import { MainContextState } from "../contexts/MainContext";
 import axios from "axios";
 import { base_path } from "../App";
+import Loader from "./loader/Loader";
 
 const Tasks = () => {
+  const [loader, setLoader] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const { users, userList, setUserList } = useContext(MainContextState);
   const [taskName, setTaskName] = useState("");
@@ -137,6 +139,7 @@ const Tasks = () => {
       return false;
     }
     setButtonTxt("Please wait...");
+    setLoader(true);
     axios
       .post(`${base_path}create-task`, taskData)
       .then((resp) => {
@@ -151,6 +154,7 @@ const Tasks = () => {
         setTimeout(() => {
           setShowModal(false);
           setButtonTxt("Add Task");
+          setLoader(false);
         }, 1500);
       })
       .catch((error) => {
@@ -184,6 +188,7 @@ const Tasks = () => {
   // console.log(taskList, "taskList");
   return (
     <>
+      {loader && <Loader />}
       <DragDropContext onDragEnd={onDragEnd}>
         <Layout>
           <div className="addTaskBtn">
@@ -348,35 +353,39 @@ const Tasks = () => {
                         onChange={(e) => handleTaskName(e)}
                         value={taskName}
                       />
-
-                      <input
-                        type="text"
+                      <textarea
                         id="Task_desc"
                         className="rounded-none rounded-r-lg mt-2 bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         placeholder="Task Description"
                         onChange={(e) => handleTaskDescription(e)}
-                        value={taskDesc}
-                      />
+                      >
+                        {taskDesc}
+                      </textarea>
+                      
                       <Select
                         className="mt-2"
                         closeMenuOnSelect={true}
                         isMulti={false}
+                        isClearable
                         searchable={true}
                         options={projectOptions}
                         onChange={(e) => handleProjectSelection(e)}
                         value={project}
                         placeholder="Select Project"
+                        noOptionsMessage={() => "No projects found."}
                       />
 
                       <Select
                         className="mt-2"
                         closeMenuOnSelect={true}
                         isMulti={false}
+                        isClearable
                         searchable={true}
                         options={options}
                         onChange={handleUserSelect}
                         value={selectedUserList}
                         placeholder="Assign Task"
+                        noOptionsMessage={() => "No members found."}
                       />
 
                       <div className="my-6">
