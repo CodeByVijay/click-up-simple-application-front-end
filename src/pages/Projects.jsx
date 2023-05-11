@@ -6,11 +6,12 @@ import { MainContextState } from "../contexts/MainContext";
 import axios from "axios";
 import { app_url, base_path } from "../App";
 import { Link } from "react-router-dom";
+import Alert from "../components/Alert";
 
 const Projects = () => {
-  const { users, userList, setUserList } = useContext(MainContextState);
-  const [msg, setMsg] = useState("");
-  const [msgColor, setMsgColor] = useState("");
+  const { users, userList, setUserList, msg, setMsg, msgColor, setMsgColor } =
+    useContext(MainContextState);
+
   const [projectName, setProjectName] = useState("");
   const [allProjects, setAllProjects] = useState([]);
   const [projectDesc, setProjectDesc] = useState("");
@@ -47,6 +48,8 @@ const Projects = () => {
   };
 
   const handleCloseModal = () => {
+    setProjectDesc("");
+    setProjectName("");
     setShowModal(false);
   };
 
@@ -82,8 +85,12 @@ const Projects = () => {
       .then((resp) => {
         setMsgColor("green-600");
         setMsg(resp.data.msg);
+        setProjectDesc("");
+        setProjectName("");
         setTimeout(() => {
           setShowModal(false);
+          setMsg("");
+          setMsgColor("");
         }, 1000);
       })
       .catch((error) => {
@@ -211,14 +218,14 @@ const Projects = () => {
                     <h3 className="text-3xl mb-2 font-semibold">
                       Add New Project
                     </h3>
-                    <span className={`text-${msgColor}`}>{msg}</span>
                   </div>
                   {/*body*/}
                   <div className="relative p-6 flex-auto">
+                    <Alert />
                     <input
                       type="text"
                       id="Project_Name"
-                      className="rounded-none rounded-r-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      className="rounded-none mt-4 rounded-r-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       placeholder="Project Name"
                       onChange={(e) => handleProjectName(e)}
                     />
@@ -227,9 +234,10 @@ const Projects = () => {
                       id="project_desc"
                       className="rounded-none rounded-r-lg mt-2 bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       placeholder="Project Description"
-                    
                       onChange={(e) => handleProjectDescription(e)}
-                    >{projectDesc}</textarea>
+                    >
+                      {projectDesc}
+                    </textarea>
 
                     <Select
                       className="mt-2"

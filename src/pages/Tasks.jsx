@@ -10,20 +10,21 @@ import { MainContextState } from "../contexts/MainContext";
 import axios from "axios";
 import { base_path } from "../App";
 import Loader from "./loader/Loader";
+import Alert from "../components/Alert";
 
 const Tasks = () => {
   const [loader, setLoader] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const { users, userList, setUserList } = useContext(MainContextState);
+  const { users, userList, setUserList, msg, setMsg, msgColor, setMsgColor } =
+    useContext(MainContextState);
   const [taskName, setTaskName] = useState("");
   const [taskDesc, setTaskDesc] = useState("");
   const [taskExpDateTime, setTaskExpDateTime] = useState("");
   const [buttonTxt, setButtonTxt] = useState("Add Task");
   const [selectedUserList, setSelectedUserList] = useState([]);
   const [project, setProject] = useState("");
+  const [projectMembers, setProjectMembers] = useState([]);
   const [projectList, setProjectList] = useState([]);
-  const [msg, setMsg] = useState("");
-  const [msgColor, setMsgColor] = useState("");
 
   const [taskList, setTaskList] = useState([]);
 
@@ -90,12 +91,6 @@ const Tasks = () => {
   const handleTaskExpDateTime = (e) => {
     setTaskExpDateTime(e.target.value);
   };
-  const options = userList
-    ? userList.map((user) => ({
-        value: user.id,
-        label: user.name,
-      }))
-    : [];
 
   const projectOptions = projectList
     ? projectList.map((project) => ({
@@ -109,8 +104,22 @@ const Tasks = () => {
     setSelectedUserList(selectedOptions);
   };
   const handleProjectSelection = (selectedOptions) => {
-    // console.log(selectedOptions.value)
+    setLoader(true);
+    const project_id = selectedOptions.value;
     setProject(selectedOptions);
+    axios
+      .get(`${base_path}get-project-members/${project_id}`)
+      .then((resp) => {
+        const members =
+          resp.data.result[0].members !== null
+            ? JSON.parse(resp.data.result[0].members)
+            : [];
+        setProjectMembers(members);
+        setLoader(false);
+      })
+      .catch((err) => {
+        console.log(err.response.data.msg);
+      });
   };
 
   const handleCreateTask = (e) => {
@@ -341,14 +350,14 @@ const Tasks = () => {
                       <h3 className="text-3xl mb-2 font-semibold">
                         Add New Task
                       </h3>
-                      <span className={`text-${msgColor}`}>{msg}</span>
                     </div>
                     {/*body*/}
                     <div className="relative p-6 flex-auto">
+                      <Alert />
                       <input
                         type="text"
                         id="Task_Name"
-                        className="rounded-none rounded-r-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        className="rounded-none rounded-r-lg mt-4 bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         placeholder="Task Name"
                         onChange={(e) => handleTaskName(e)}
                         value={taskName}
@@ -361,12 +370,12 @@ const Tasks = () => {
                       >
                         {taskDesc}
                       </textarea>
-                      
+
                       <Select
                         className="mt-2"
                         closeMenuOnSelect={true}
                         isMulti={false}
-                        isClearable
+                        isClearable={false}
                         searchable={true}
                         options={projectOptions}
                         onChange={(e) => handleProjectSelection(e)}
@@ -379,9 +388,9 @@ const Tasks = () => {
                         className="mt-2"
                         closeMenuOnSelect={true}
                         isMulti={false}
-                        isClearable
+                        isClearable={true}
                         searchable={true}
-                        options={options}
+                        options={projectMembers}
                         onChange={handleUserSelect}
                         value={selectedUserList}
                         placeholder="Assign Task"

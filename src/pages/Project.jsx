@@ -4,16 +4,16 @@ import Layout from "../components/Layout";
 import Select from "react-select";
 import axios from "axios";
 import { app_url, base_path } from "../App";
-import { FaPencilAlt, FaPlus, FaTrash } from "react-icons/fa";
+import { FaArrowLeft, FaPencilAlt, FaPlus, FaTrash } from "react-icons/fa";
 import { MainContextState } from "../contexts/MainContext";
 import Loader from "./loader/Loader";
+import Alert from "../components/Alert";
 
 const Project = () => {
   const navigate = useNavigate();
   const [loader, setLoader] = useState(false);
-  const { users, userList, setUserList } = useContext(MainContextState);
-  const [msg, setMsg] = useState("");
-  const [msgColor, setMsgColor] = useState("");
+  const { users, userList, setUserList, msg, setMsg, msgColor, setMsgColor } =
+    useContext(MainContextState);
   const { id } = useParams();
   const [project, setProject] = useState([]);
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
@@ -44,6 +44,7 @@ const Project = () => {
   ];
 
   useEffect(() => {
+    setLoader(true);
     getProject();
   }, []);
 
@@ -161,7 +162,6 @@ const Project = () => {
 
   // Edit Project
   const hanleProjectEditModal = () => {
-    console.log(project);
     setProjectName(project[0].project_name);
     setProjectDesc(project[0].description);
     setShowProjectEditModal(true);
@@ -189,10 +189,10 @@ const Project = () => {
         setMsg(resp.data.msg);
         setMsgColor("green-600");
         getProject();
+        setShowProjectEditModal(false);
         setTimeout(() => {
-          setShowProjectEditModal(false);
           setLoader(false);
-        }, 1000);
+        }, 1500);
       })
       .catch((err) => {
         setMsg(err.response.data.msg);
@@ -224,20 +224,28 @@ const Project = () => {
       <Layout>
         <div className="container dark:text-gray-100 dark:bg-[#1e293b]">
           <div className="head my-3 text-center">
-            <span
-              className="float-right p-2 bg-rose-500 mr-3 hover:bg-rose-600 text-white rounded-lg"
-              title="Delete This Project"
-              onClick={handleProjectDelete}
+            <button
+              className="text-lg float-left"
+              onClick={() => navigate(-1)}
+              title="Go Back"
             >
-              <FaTrash />
-            </span>
+              <FaArrowLeft />{" "}
+            </button>
+
+            {project[0]?.admin_id === users.id && (
+              <span
+                className="float-right p-2 bg-rose-500 mr-3 hover:bg-rose-600 text-white rounded-lg"
+                title="Delete This Project"
+                onClick={handleProjectDelete}
+              >
+                <FaTrash />
+              </span>
+            )}
             <h4 className="font-black text-lg">
               {project.length > 0 ? project[0].project_name : ""}
             </h4>
 
-            <p>
-              <span className={`text-${msgColor}`}>{msg}</span>
-            </p>
+            <Alert />
           </div>
 
           <hr />
@@ -245,12 +253,14 @@ const Project = () => {
             <div className="partOne bg-gray-50 m-3 dark:bg-[#1e293b] dark:border-2 dark:border-gray-100">
               <div className="partOneHead my-4 font-bold pl-4">
                 Project Info
-                <button
-                  className="float-right bg-blue-500 text-white p-2 rounded-lg mr-3 hover:bg-blue-700"
-                  onClick={hanleProjectEditModal}
-                >
-                  <FaPencilAlt />
-                </button>
+                {project[0]?.admin_id === users.id && (
+                  <button
+                    className="float-right bg-blue-500 text-white p-2 rounded-lg mr-3 hover:bg-blue-700"
+                    onClick={hanleProjectEditModal}
+                  >
+                    <FaPencilAlt />
+                  </button>
+                )}
               </div>
               <hr />
               <div className="pl-4 my-4">
@@ -268,51 +278,61 @@ const Project = () => {
                   <span className="font-bold">Project Manager : </span>
                   {project.length > 0 ? project[0].admin_name : ""}
                 </p>
+
+                <p className="my-2">
+                  <span className="font-bold">Project Manager : </span>
+                  {project[0]?.status ===0 ? "Pending":"Complete"}
+                </p>
               </div>
             </div>
             <div className="partTwo bg-gray-50 m-3 dark:bg-[#1e293b] dark:border-2 dark:border-white">
               <div className="partTwoHead my-4 font-bold pl-4">
                 Members
-                <button
-                  className="float-right bg-blue-500 text-white p-2 rounded-lg mr-3 hover:bg-blue-700"
-                  onClick={handleAddMemberModelOpen}
-                >
-                  <FaPlus />
-                </button>
+                {project[0]?.admin_id === users.id && (
+                  <button
+                    className="float-right bg-blue-500 text-white p-2 rounded-lg mr-3 hover:bg-blue-700"
+                    onClick={handleAddMemberModelOpen}
+                  >
+                    <FaPlus />
+                  </button>
+                )}
               </div>
               <hr />
               <div className="pl-4 my-4">
                 <ul className="list-outside list-decimal pl-4">
-                  {project.length > 0 &&
-                    project[0].members !== null &&
-                    JSON.parse(project[0].members).map((val, i) => {
-                      // console.log(val,"sad")
-                      return (
-                        <>
-                          <li key={i + 1} className="m-2">
-                            <div className="items grid grid-cols-2">
-                              <p>{val.label}</p>
+                  {project[0]?.members !== null &&
+                  project[0]?.members.length > 0
+                    ? JSON.parse(project[0].members).map((val, i) => {
+                        // console.log(val,"sad")
+                        return (
+                          <>
+                            <li key={i + 1} className="m-2">
+                              <div className="items grid grid-cols-2">
+                                <p>{val.label}</p>
 
-                              {users.id === project[0].admin_id && (
-                                <>
-                                  <p className="text-right mr-5">
-                                    <button
-                                      className="bg-rose-500 text-white p-2 rounded-lg mb-2"
-                                      onClick={(e) =>
-                                        handleMember(e, val.value)
-                                      }
-                                    >
-                                      <FaTrash />
-                                    </button>
-                                  </p>
-                                </>
-                              )}
-                            </div>
-                          </li>
-                          <hr className="w-full" />
-                        </>
-                      );
-                    })}
+                                {users.id === project[0].admin_id && (
+                                  <>
+                                    <p className="text-right mr-5">
+                                      {project[0]?.admin_id === users.id && (
+                                        <button
+                                          className="bg-rose-500 text-white p-2 rounded-lg mb-2"
+                                          onClick={(e) =>
+                                            handleMember(e, val.value)
+                                          }
+                                        >
+                                          <FaTrash />
+                                        </button>
+                                      )}
+                                    </p>
+                                  </>
+                                )}
+                              </div>
+                            </li>
+                            <hr className="w-full" />
+                          </>
+                        );
+                      })
+                    : "No Members Added."}
                 </ul>
               </div>
             </div>
@@ -333,12 +353,12 @@ const Project = () => {
                   <h3 className="text-3xl mb-2 font-semibold">
                     Invite New Member
                   </h3>
-                  <span className={`text-${msgColor}`}>{msg}</span>
                 </div>
                 {/*body*/}
                 <div className="relative p-6 flex-auto">
+                  <Alert />
                   <Select
-                    className="mt-2"
+                    className="mt-4"
                     closeMenuOnSelect={false}
                     isMulti={true}
                     searchable={true}
@@ -389,14 +409,14 @@ const Project = () => {
                 {/*header*/}
                 <div className="flex items-start justify-between p-5 border-b border-solid border-slate-200 rounded-t w-full text-center">
                   <h3 className="text-3xl mb-2 font-semibold">Edit Project</h3>
-                  <span className={`text-${msgColor}`}>{msg}</span>
                 </div>
                 {/*body*/}
                 <div className="relative p-6 flex-auto">
+                  <Alert />
                   <input
                     type="text"
                     id="Project_Name"
-                    className="rounded-none rounded-r-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className="rounded-none mt-4 rounded-r-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     placeholder="Project Name"
                     value={projectName}
                     onChange={(e) => handleProjectName(e)}

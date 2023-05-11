@@ -1,20 +1,22 @@
 import React, { useContext, useEffect, useState } from "react";
 import Layout from "../components/Layout";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { base_path } from "../App";
 import Select from "react-select";
 import { MainContextState } from "../contexts/MainContext";
 import Loader from "./loader/Loader";
 import userImage from "../assets/images/user.png";
-import { FaTrash } from "react-icons/fa";
+import { FaArrowLeft, FaTrash } from "react-icons/fa";
+import Alert from "../components/Alert";
 
 const Task = () => {
-  const { users, userList, setUserList } = useContext(MainContextState);
+  const navigate = useNavigate();
+  const { users, userList, setUserList, msg, setMsg, msgColor, setMsgColor } =
+    useContext(MainContextState);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
-  const [msg, setMsg] = useState("");
-  const [msgColor, setMsgColor] = useState("");
+
   const [task, setTask] = useState([]);
   const { id } = useParams();
   const [loader, setLoader] = useState(true);
@@ -22,6 +24,10 @@ const Task = () => {
   const [selectedStatus, setSelectedStatus] = useState([]);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState([]);
+
+  const [projectMembers, setProjectMembers] = useState([]);
+  const [taskExdateTime, setTaskExdateTime] = useState("");
+
   useEffect(() => {
     getTask();
     getUserList();
@@ -29,6 +35,8 @@ const Task = () => {
 
   // Get Task
   const getTask = () => {
+    setLoader(false);
+    setLoader(true);
     axios
       .get(`${base_path}task/${id}`)
       .then((res) => {
@@ -39,7 +47,23 @@ const Task = () => {
         });
         setComments(res.data.comments);
         setLoader(false);
-        // console.log(selectedStatus);
+        const date = new Date(res.data.result[0].expected_date_time);
+        const formatedDateTime = date.toLocaleTimeString("en-US", {
+          day: "numeric",
+          weekday: "short",
+          year: "numeric",
+          month: "short",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
+        setTaskExdateTime(formatedDateTime);
+        const assignedUser = {
+          value: res.data.result[0].assignToId,
+          label: res.data.result[0].assignTo,
+        };
+        setSelectedUserList(assignedUser);
+        setLoader(false);
       })
       .catch((err) => {
         console.log(err, "Err");
@@ -59,13 +83,6 @@ const Task = () => {
       });
   };
 
-  const options = userList
-    ? userList.map((user) => ({
-        value: user.id,
-        label: user.name,
-      }))
-    : [];
-
   const taskStatus = [
     {
       value: "assigned",
@@ -82,7 +99,6 @@ const Task = () => {
   ];
 
   const handleUserSelect = (selectedOptions) => {
-    // console.log(selectedOptions)
     setSelectedUserList(selectedOptions);
   };
   const handletaskStatus = (selectedOptions) => {
@@ -98,13 +114,30 @@ const Task = () => {
   const handleUserModelOpen = () => {
     setMsg("");
     setMsgColor("");
-    setSelectedUserList([]);
+    setLoader(false);
+    setLoader(true);
+    const project_id = task[0].project_id;
+    axios
+      .get(`${base_path}get-project-members/${project_id}`)
+      .then((resp) => {
+        const members =
+          resp.data.result[0].members !== null
+            ? JSON.parse(resp.data.result[0].members)
+            : [];
+        setProjectMembers(members);
+        setLoader(false);
+      })
+      .catch((err) => {
+        console.log(err.response.data.msg);
+      });
+
     setShowUserModal(true);
   };
 
   const handleCloseModal = () => {
     setShowStatusModal(false);
     setShowUserModal(false);
+    getTask();
   };
   const handleChangeStatus = (e) => {
     e.preventDefault();
@@ -116,7 +149,7 @@ const Task = () => {
       .post(`${base_path}task-status-change`, statusData)
       .then((res) => {
         setMsg(res.data.msg);
-        setMsgColor("green-700");
+        setMsgColor("green-600");
         getTask();
         setShowStatusModal(false);
       })
@@ -129,19 +162,21 @@ const Task = () => {
 
   const handleAssignTask = (e) => {
     e.preventDefault();
+    console.log(selectedUserList);
     const postData = {
       task_id: id,
       assignUserId: selectedUserList.value, // Assign to user id
       assignUserName: selectedUserList.label, // Assign to user name
       task_assign_user_name: users.name,
       task_assign_user_id: users.id,
+      task_status: "assigned",
     };
     // console.log(postData)
     axios
       .post(`${base_path}task-assign`, postData)
       .then((res) => {
         setMsg(res.data.msg);
-        setMsgColor("green-700");
+        setMsgColor("green-600");
         getTask();
         setShowUserModal(false);
       })
@@ -155,24 +190,64 @@ const Task = () => {
     setCommentText(e.target.value);
   };
   const handlePostComment = () => {
+    setLoader(false);
+    setLoader(true);
     const postData = {
       task_id: Number(id),
       user_id: users.id,
       comment: commentText,
     };
-    
+
     axios
       .post(`${base_path}store-comment`, postData)
       .then((resp) => {
-        getTask();
-        setCommentText("")
-        setMsg(resp.data.msg);
-        setMsgColor('green-600')
+        setTimeout(() => {
+          getTask();
+          setCommentText("");
+          setMsg(resp.data.msg);
+          setMsgColor("green-600");
+        }, 1000);
       })
       .catch((error) => {
         console.log(error.response.data.msg);
       });
   };
+
+  const handleCommentDelete = (comment_id) => {
+    setLoader(false);
+    setLoader(true);
+    axios
+      .get(`${base_path}delete-comment/${comment_id}`)
+      .then((resp) => {
+        setTimeout(() => {
+          setMsg(resp.data.msg);
+          setMsgColor("rose-600");
+          getTask();
+        }, 1500);
+      })
+      .catch((error) => {
+        console.log(error.response.data.msg);
+      });
+  };
+
+  // Task Delete
+  const handleDeleteTask = (task_id) => {
+    setLoader(false);
+    setLoader(true);
+    axios
+      .get(`${base_path}delete-task/${task_id}`)
+      .then((resp) => {
+        setTimeout(() => {
+          setMsg(resp.data.msg);
+          setMsgColor("rose-600");
+          navigate("../task-list");
+        }, 1500);
+      })
+      .catch((error) => {
+        console.log(error.response.data.msg);
+      });
+  };
+
   return (
     <>
       {loader && <Loader />}
@@ -184,29 +259,67 @@ const Task = () => {
                 <div
                   className={`taskGrid col-span-2 h-full bg-gray-100 px-10 py-5 hover:bg-gray-200 rounded-lg dark:bg-[#1e293b] dark:text-gray-100 dark:border-2 dark:border-gray-100`}
                 >
-                  <div className="text-center font-black text-lg border-blue-300 border-b-2 p-2 hover:border-blue-400 my-4">
+                  <button
+                    className="text-lg float-left"
+                    onClick={() => navigate(-1)}
+                    title="Go Back"
+                  >
+                    <FaArrowLeft />{" "}
+                  </button>
+
+                  {(task[0].project_manager_id === users.id ||
+                    JSON.parse(task[0]?.project_members || "[]").some(
+                      (member) => member.value === users.id
+                    )) && (
+                    <>
+                      <button
+                        className="text-lg float-right text-rose-600"
+                        onClick={() => handleDeleteTask(task[0].task_id)}
+                        title="Delete Task"
+                      >
+                        <FaTrash />{" "}
+                      </button>
+                    </>
+                  )}
+
+                  <div className="text-center font-black text-lg border-blue-300 border-b-2 pb-2 px-2 hover:border-blue-400 my-4">
                     <h4>Task Details</h4>
                   </div>
-                  <span className={`text-${msgColor}`}>{msg}</span>
+
+                  <Alert />
 
                   <div className="action m-3 p-2 grid grid-cols-2 gap-3">
                     <div className="changeStatus text-left">
-                      <button
-                        className="p-2 bg-green-600 hover:bg-green-700 text-white hover:text-gray-50 rounded-lg"
-                        onClick={handleStatusModelOpen}
-                      >
-                        {" "}
-                        Change Status
-                      </button>
+                      {(task[0].project_manager_id === users.id ||
+                        JSON.parse(task[0]?.project_members || "[]").some(
+                          (member) => member.value === users.id
+                        )) && (
+                        <>
+                          <button
+                            className="p-2 bg-green-600 hover:bg-green-700 text-white hover:text-gray-50 rounded-lg"
+                            onClick={handleStatusModelOpen}
+                          >
+                            {" "}
+                            Change Status
+                          </button>
+                        </>
+                      )}
                     </div>
                     <div className="assignTask text-right">
-                      <button
-                        className="p-2 bg-green-600 hover:bg-green-700 text-white hover:text-gray-50 rounded-lg"
-                        onClick={handleUserModelOpen}
-                      >
-                        {" "}
-                        Assign Task
-                      </button>
+                      {(task[0].project_manager_id === users.id ||
+                        JSON.parse(task[0]?.project_members || "[]").some(
+                          (member) => member.value === users.id
+                        )) && (
+                        <>
+                          <button
+                            className="p-2 bg-green-600 hover:bg-green-700 text-white hover:text-gray-50 rounded-lg"
+                            onClick={handleUserModelOpen}
+                          >
+                            {" "}
+                            Assign Task
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -238,13 +351,13 @@ const Task = () => {
                         </label>
                       </div>
                       <div>
-                        <span>{task[0].expected_date_time}</span>
+                        <span>{taskExdateTime}</span>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 my-2">
                       <div>
-                        <label className="font-black">Assing : </label>
+                        <label className="font-black">Task Created : </label>
                       </div>
                       <div>
                         <span>{task[0].assignFrom}</span>
@@ -253,10 +366,19 @@ const Task = () => {
 
                     <div className="grid grid-cols-2 my-2">
                       <div>
+                        <label className="font-black">Assign Task : </label>
+                      </div>
+                      <div>
+                        <span>{task[0].assignTo}</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 my-2">
+                      <div>
                         <label className="font-black">Status : </label>
                       </div>
                       <div>
-                        <span>{task[0].status}</span>
+                        <span className="capitalize">{task[0].status}</span>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 my-2">
@@ -271,22 +393,47 @@ const Task = () => {
                             key={val.comment_id}
                             className="grid grid-cols-1 rounded-lg bg-blue-50 border-blue-100 border-2 m-2 dark:bg-[#1e293b] dark:text-gray-100"
                           >
-                              {/* <span className="text-right m-1 p-1"><FaTrash/></span> */}
+                            {/* <span className="text-right m-1 p-1"><FaTrash/></span> */}
 
-                            <div className="flex p-3 m-4">
-                              <div className="avatar rounded-xl shadow-xl shadow-blue-800">
-                                <img
-                                  src={userImage}
-                                  alt=""
-                                  width={`48px`}
-                                  height={`48px`}
-                                />
+                            <div className="flex p-2 m-4 justify-between">
+                              <div className="userName flex">
+                                <div className="avatar rounded-xl shadow-xl shadow-blue-800">
+                                  <img
+                                    src={userImage}
+                                    alt=""
+                                    width={`48px`}
+                                    height={`48px`}
+                                  />
+                                </div>
+                                <div className="name mt-4 ml-4 font-medium">
+                                  <p>{val.user_name}</p>
+                                </div>
                               </div>
-                              <div className="name mt-4 ml-4 font-medium">
-                                <p>{val.user_name}</p>
+
+                              <div className="commentDelete">
+                                {(task[0].project_manager_id === users.id ||
+                                  JSON.parse(
+                                    task[0]?.project_members || "[]"
+                                  ).some(
+                                    (member) => member.value === users.id
+                                  )) && (
+                                  <>
+                                    <button
+                                      type="button"
+                                      className="text-rose-600"
+                                      onClick={() =>
+                                        handleCommentDelete(val.comment_id)
+                                      }
+                                    >
+                                      <FaTrash />
+                                    </button>
+                                  </>
+                                )}
                               </div>
                             </div>
-                            <div className="comments px-5 py-2">{val.comment}</div>
+                            <div className="comments px-5 py-2">
+                              {val.comment}
+                            </div>
                           </div>
                         </>
                       );
@@ -425,7 +572,7 @@ const Task = () => {
                     <h3 className="text-3xl mb-2 font-semibold">
                       Change Status
                     </h3>
-                    <span className={`text-${msgColor}`}>{msg}</span>
+                    <Alert />
                   </div>
                   {/*body*/}
                   <div className="relative p-6 flex-auto">
@@ -475,7 +622,7 @@ const Task = () => {
                     <h3 className="text-3xl mb-2 font-semibold">
                       Change Member
                     </h3>
-                    <span className={`text-${msgColor}`}>{msg}</span>
+                    <Alert />
                   </div>
                   <div className="relative p-6 flex-auto">
                     <Select
@@ -483,10 +630,11 @@ const Task = () => {
                       closeMenuOnSelect={true}
                       isMulti={false}
                       searchable={true}
-                      options={options}
+                      options={projectMembers}
                       onChange={handleUserSelect}
                       value={selectedUserList}
                       placeholder="Assign Task"
+                      noOptionsMessage={() => "No members found."}
                     />
                   </div>
                   <div className="flex items-center justify-end p-6 border-t border-solid border-slate-200 rounded-b">
