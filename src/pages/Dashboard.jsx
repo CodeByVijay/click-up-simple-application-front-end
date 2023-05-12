@@ -17,7 +17,6 @@ const Dashboard = () => {
     axios
       .get(`${base_path}my-task/${users.id}`)
       .then((res) => {
-        console.log(res.data.result);
         setTask(res.data.result);
       })
       .catch((error) => {

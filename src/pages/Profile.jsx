@@ -1,11 +1,22 @@
 import React, { useContext, useState } from "react";
 import { MainContextState } from "../contexts/MainContext";
 import Layout from "../components/Layout";
+import axios from "axios";
+import { base_path } from "../App";
+import { useNavigate } from "react-router-dom";
+import { Cookies } from "react-cookie";
+import Loader from "./loader/Loader";
+
+const cookies = new Cookies();
 
 const Profile = () => {
-  const { users } = useContext(MainContextState);
+  const navigate = useNavigate();
+  const [loader, setLoader] = useState(false);
+
+  const { users, setUsers, setLoginCheck } = useContext(MainContextState);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
@@ -73,8 +84,76 @@ const Profile = () => {
       : setPasswordType("password");
   };
 
+  const handleUpdateDetails = (e) => {
+    e.preventDefault();
+    setLoader(true);
+    const postData = {
+      id: users.id,
+      name: userName,
+      email: userEmail,
+    };
+    axios
+      .post(`${base_path}update-profile`, postData)
+      .then((res) => {
+        if (res.data.result === "success") {
+          setShowProfileModal(false);
+          setTimeout(() => {
+            setShowLogoutModal(true);
+            cookies.remove("access_token");
+            cookies.remove("user_data");
+            setUsers([]);
+            setLoginCheck(false);
+            setLoader(false);
+          }, 1500);
+        }
+      })
+      .catch((err) => {
+        console.log(err.response.data.msg);
+      });
+  };
+  const handleUpdatePassword =(e)=>{
+    e.preventDefault();
+    setLoader(true);
+    const postData ={
+      id:users.id,
+      password:password
+    }
+    axios
+    .post(`${base_path}update-password`, postData)
+    .then((res) => {
+      if (res.data.result === "success") {
+        setShowPasswordModal(false);
+        setTimeout(() => {
+          setShowLogoutModal(true);
+          cookies.remove("access_token");
+          cookies.remove("user_data");
+          setUsers([]);
+          setLoginCheck(false);
+          setLoader(false);
+        }, 1500);
+      }
+    })
+    .catch((err) => {
+      console.log(err.response.data.msg);
+    });
+  }
+
+  const handleLogout = (e) => {
+    e.preventDefault();
+    setLoader(true);
+    cookies.remove("access_token");
+    cookies.remove("user_data");
+    setUsers([]);
+    setLoginCheck(false);
+    setTimeout(() => {
+      setLoader(false);
+      navigate("/login");
+    }, 1500);
+  };
+
   return (
     <>
+      {loader && <Loader />}
       <Layout>
         <div className="profile bg-gray-50">
           <div className="head rounded-lg shadow-lg shadow-gray-500 p-5">
@@ -184,6 +263,7 @@ const Profile = () => {
                     <button
                       className="text-white bg-green-600 rounded-lg font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150 md:text-sm sm:text-sm text-xs"
                       type="button"
+                      onClick={(e) => handleUpdateDetails(e)}
                     >
                       Update Details
                     </button>
@@ -263,8 +343,45 @@ const Profile = () => {
                       }  rounded-lg font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150 md:text-sm sm:text-sm text-xs`}
                       type="button"
                       disabled={passwordBtn}
+                      onClick={(e)=>handleUpdatePassword(e)}
                     >
                       Update Password
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
+          </>
+        )}
+        {/* Update Password Modal End */}
+
+        {/* Update Password Modal */}
+        {showLogoutModal && (
+          <>
+            <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
+              <div className="relative w-auto my-6 mx-auto max-w-3xl h-2/3 w-2/3 md:w-5/6 sm:w-5/6">
+                {/*content*/}
+                <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
+                  {/*header*/}
+                  <div className="flex items-start justify-between p-5 border-b border-solid border-slate-200 rounded-t w-full text-center">
+                    <h3 className="text-3xl mb-2 font-semibold">Attention</h3>
+                  </div>
+                  {/*body*/}
+                  <div className="relative p-6 flex-auto">
+                    <p>
+                      Your Profile Successfully Updated. Please Login Again Your
+                      Account.
+                    </p>
+                  </div>
+                  {/*footer*/}
+                  <div className="flex items-center justify-end p-6 border-t border-solid border-slate-200 rounded-b">
+                    <button
+                      className={`text-gray-100 bg-green-600 rounded-lg font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150 md:text-sm sm:text-sm text-xs cursor-pointer`}
+                      type="button"
+                      onClick={(e) => handleLogout(e)}
+                    >
+                      Please Login Again
                     </button>
                   </div>
                 </div>

@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 
 import Layout from "../components/Layout";
 import { FaPlus } from "react-icons/fa";
@@ -9,22 +8,41 @@ import Select from "react-select";
 import { MainContextState } from "../contexts/MainContext";
 import axios from "axios";
 import { base_path } from "../App";
-import Loader from "./loader/Loader";
-import Alert from "../components/Alert";
+
+const Task = ({ task }) => {
+  const [isDragging, setIsDragging] = useState(false);
+
+  return (
+    <Draggable draggableId={task.id} isDragging={isDragging}>
+      {(provided, snapshot) => (
+        <div
+          className={`tasks my-2 p-3 bg-red-200 rounded-lg ${
+            snapshot.isDragging ? "opacity-50" : ""
+          }`}
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+        >
+          <h3>{task.task_name}</h3>
+        </div>
+      )}
+    </Draggable>
+  );
+};
+
 
 const Tasks = () => {
-  const [loader, setLoader] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const { users, userList, setUserList, msg, setMsg, msgColor, setMsgColor } =
-    useContext(MainContextState);
+  const { users, userList, setUserList } = useContext(MainContextState);
   const [taskName, setTaskName] = useState("");
   const [taskDesc, setTaskDesc] = useState("");
   const [taskExpDateTime, setTaskExpDateTime] = useState("");
   const [buttonTxt, setButtonTxt] = useState("Add Task");
   const [selectedUserList, setSelectedUserList] = useState([]);
   const [project, setProject] = useState("");
-  const [projectMembers, setProjectMembers] = useState([]);
   const [projectList, setProjectList] = useState([]);
+  const [msg, setMsg] = useState("");
+  const [msgColor, setMsgColor] = useState("");
 
   const [taskList, setTaskList] = useState([]);
 
@@ -91,6 +109,12 @@ const Tasks = () => {
   const handleTaskExpDateTime = (e) => {
     setTaskExpDateTime(e.target.value);
   };
+  const options = userList
+    ? userList.map((user) => ({
+        value: user.id,
+        label: user.name,
+      }))
+    : [];
 
   const projectOptions = projectList
     ? projectList.map((project) => ({
@@ -104,22 +128,8 @@ const Tasks = () => {
     setSelectedUserList(selectedOptions);
   };
   const handleProjectSelection = (selectedOptions) => {
-    setLoader(true);
-    const project_id = selectedOptions.value;
+    // console.log(selectedOptions.value)
     setProject(selectedOptions);
-    axios
-      .get(`${base_path}get-project-members/${project_id}`)
-      .then((resp) => {
-        const members =
-          resp.data.result[0].members !== null
-            ? JSON.parse(resp.data.result[0].members)
-            : [];
-        setProjectMembers(members);
-        setLoader(false);
-      })
-      .catch((err) => {
-        console.log(err.response.data.msg);
-      });
   };
 
   const handleCreateTask = (e) => {
@@ -148,7 +158,6 @@ const Tasks = () => {
       return false;
     }
     setButtonTxt("Please wait...");
-    setLoader(true);
     axios
       .post(`${base_path}create-task`, taskData)
       .then((resp) => {
@@ -159,11 +168,9 @@ const Tasks = () => {
         setTaskExpDateTime("");
         setSelectedUserList("");
         setProject("");
-        getTaskList();
         setTimeout(() => {
           setShowModal(false);
           setButtonTxt("Add Task");
-          setLoader(false);
         }, 1500);
       })
       .catch((error) => {
@@ -172,32 +179,15 @@ const Tasks = () => {
   };
 
   const onDragEnd = (result) => {
-    const { source, destination, draggableId } = result;
-    console.log(result, "drag & drop");
-    if (!destination) {
-      return;
-    }
-    if (source.droppableId === destination.droppableId) {
-      const newTaskList = [...taskList];
-      const status = parseInt(source.droppableId);
-      const [removed] = newTaskList[status].splice(source.index, 1);
-      newTaskList[status].splice(destination.index, 0, removed);
-      setTaskList(newTaskList);
-    } else {
-      const sourceStatus = parseInt(source.droppableId);
-      const destStatus = parseInt(destination.droppableId);
-      const newTaskList = [...taskList];
-      const [removed] = newTaskList[sourceStatus].splice(source.index, 1);
-      removed.status = destStatus;
-      newTaskList[destStatus].splice(destination.index, 0, removed);
-      setTaskList(newTaskList);
+    if (result.destination) {
+      const task = taskList[result.source.index];
+      task.status = result.destination.droppableId;
+      setTaskList([...taskList.filter((t, i) => i !== result.source.index), task]);
     }
   };
 
-  // console.log(taskList, "taskList");
   return (
     <>
-      {loader && <Loader />}
       <DragDropContext onDragEnd={onDragEnd}>
         <Layout>
           <div className="addTaskBtn">
@@ -210,7 +200,7 @@ const Tasks = () => {
           </div>
 
           <div className="grid grid-cols-3 gap-3">
-            <Droppable droppableId="assigned">
+           <Droppable droppableId="assigned">
               {(provided, snapshot) => (
                 <div
                   className={`assigned bg-yellow-100 rounded-md p-2 text-center h-full ${
@@ -221,32 +211,9 @@ const Tasks = () => {
                 >
                   <div className="head my-3 font-semibold">Assigned Task</div>
                   <hr />
-                  {taskList.map((task, index) => {
-                    return (
-                      task.status === "assigned" && (
-                        <Draggable
-                          key={task.id}
-                          draggableId={`assigned${task.id.toString()}`}
-                          index={index}
-                        >
-                          {(provided, snapshot) => (
-                            <Link to={`/task/${task.id}`}>
-                              <div
-                                className={`tasks my-2 p-3 bg-red-200 rounded-lg ${
-                                  snapshot.isDragging ? "opacity-50" : ""
-                                }`}
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                              >
-                                <h3>{task.task_name}</h3>
-                              </div>
-                            </Link>
-                          )}
-                        </Draggable>
-                      )
-                    );
-                  })}
+                  {taskList.filter((task) => task.status === "assigned").map((task, index) => (
+                    <Task key={task.id} task={task} index={index} />
+                  ))}
                   {provided.placeholder}
                 </div>
               )}
@@ -255,42 +222,17 @@ const Tasks = () => {
             <Droppable droppableId="in-progress">
               {(provided, snapshot) => (
                 <div
-                  className={`in-progress bg-green-100 rounded-md p-2 text-center h-full ${
+                  className={`in-progress bg-yellow-100 rounded-md p-2 text-center h-full ${
                     snapshot.isDraggingOver ? "bg-green-200" : ""
                   }`}
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                 >
-                  <div className="head my-3 font-semibold">
-                    In Progress Task
-                  </div>
+                  <div className="head my-3 font-semibold">In Progress Task</div>
                   <hr />
-                  {taskList.map((task, index) => {
-                    return (
-                      task.status === "in-progress" && (
-                        <Draggable
-                          key={task.id}
-                          draggableId={`in-progress${task.id.toString()}`}
-                          index={index}
-                        >
-                          {(provided, snapshot) => (
-                            <Link to={`/task/${task.id}`}>
-                              <div
-                                className={`tasks my-2 p-3 bg-yellow-200 rounded-lg ${
-                                  snapshot.isDragging ? "opacity-50" : ""
-                                }`}
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                              >
-                                <h3>{task.task_name}</h3>
-                              </div>
-                            </Link>
-                          )}
-                        </Draggable>
-                      )
-                    );
-                  })}
+                  {taskList.filter((task) => task.status === "in-progress").map((task, index) => (
+                    <Task key={task.id} task={task} index={index} />
+                  ))}
                   {provided.placeholder}
                 </div>
               )}
@@ -299,7 +241,7 @@ const Tasks = () => {
             <Droppable droppableId="completed">
               {(provided, snapshot) => (
                 <div
-                  className={`completed bg-green-100 rounded-md p-2 text-center h-full ${
+                  className={`completed bg-yellow-100 rounded-md p-2 text-center h-full ${
                     snapshot.isDraggingOver ? "bg-green-200" : ""
                   }`}
                   ref={provided.innerRef}
@@ -307,36 +249,15 @@ const Tasks = () => {
                 >
                   <div className="head my-3 font-semibold">Completed Task</div>
                   <hr />
-                  {taskList.map((task, index) => {
-                    return (
-                      task.status === "completed" && (
-                        <Draggable
-                          key={task.id}
-                          draggableId={`completed${task.id.toString()}`}
-                          index={index}
-                        >
-                          {(provided, snapshot) => (
-                            <Link to={`/task/${task.id}`}>
-                              <div
-                                className={`tasks my-2 p-3 bg-green-200 rounded-lg ${
-                                  snapshot.isDragging ? "opacity-50" : ""
-                                }`}
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                              >
-                                <h3>{task.task_name}</h3>
-                              </div>
-                            </Link>
-                          )}
-                        </Draggable>
-                      )
-                    );
-                  })}
+                  {taskList.filter((task) => task.status === "completed").map((task, index) => (
+                    <Task key={task.id} task={task} index={index} />
+                  ))}
                   {provided.placeholder}
                 </div>
               )}
             </Droppable>
+
+
           </div>
 
           {showModal && (
@@ -350,51 +271,47 @@ const Tasks = () => {
                       <h3 className="text-3xl mb-2 font-semibold">
                         Add New Task
                       </h3>
+                      <span className={`text-${msgColor}`}>{msg}</span>
                     </div>
                     {/*body*/}
                     <div className="relative p-6 flex-auto">
-                      <Alert />
                       <input
                         type="text"
                         id="Task_Name"
-                        className="rounded-none rounded-r-lg mt-4 bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        className="rounded-none rounded-r-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         placeholder="Task Name"
                         onChange={(e) => handleTaskName(e)}
                         value={taskName}
                       />
-                      <textarea
+
+                      <input
+                        type="text"
                         id="Task_desc"
                         className="rounded-none rounded-r-lg mt-2 bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         placeholder="Task Description"
                         onChange={(e) => handleTaskDescription(e)}
-                      >
-                        {taskDesc}
-                      </textarea>
-
+                        value={taskDesc}
+                      />
                       <Select
                         className="mt-2"
                         closeMenuOnSelect={true}
                         isMulti={false}
-                        isClearable={false}
                         searchable={true}
                         options={projectOptions}
                         onChange={(e) => handleProjectSelection(e)}
                         value={project}
                         placeholder="Select Project"
-                        noOptionsMessage={() => "No projects found."}
                       />
 
                       <Select
                         className="mt-2"
                         closeMenuOnSelect={true}
                         isMulti={false}
-                        isClearable={true}
                         searchable={true}
-                        options={projectMembers}
+                        options={options}
                         onChange={handleUserSelect}
                         value={selectedUserList}
                         placeholder="Assign Task"
-                        noOptionsMessage={() => "No members found."}
                       />
 
                       <div className="my-6">

@@ -116,13 +116,13 @@ const Projects = () => {
           </div>
           <div className="grid grid-cols-1 auto-rows-fr xl:grid-cols-4 lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-2">
             {allProjects.length > 0 &&
-              allProjects.map((val, _) => {
+              allProjects.map((val, i) => {
                 // console.log(val)
                 return (
                   <>
                     {val.status === 0 ? (
                       <>
-                        <Link to={`/project/${val.id}`}>
+                        <Link key={i} to={`/project/${val.id}`}>
                           <div className="m-2 bg-gray-100 border-2 border-gray-200 p-3 hover:bg-blue-200 h-full overflow-hidden">
                             <div className="text-center">
                               {/* <span className="float-right text-rose-700 px-2 mx-2 cursor-pointer hover:text-lg">
