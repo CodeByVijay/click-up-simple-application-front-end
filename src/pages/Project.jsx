@@ -280,7 +280,7 @@ const Project = () => {
                 </p>
 
                 <p className="my-2">
-                  <span className="font-bold">Project Manager : </span>
+                  <span className="font-bold">Project Status : </span>
                   {project[0]?.status ===0 ? "Pending":"Complete"}
                 </p>
               </div>

@@ -80,6 +80,15 @@ const Projects = () => {
       members: selectedUserList,
       invite_link: app_url + "invite/",
     };
+    if (
+      projectName === "" ||
+      projectDesc === "" ||
+      selectedUserList.length == 0
+    ) {
+      setMsgColor("rose-700");
+      setMsg("Please fill all fields.");
+      return false;
+    }
     axios
       .post(`${base_path}store-project`, data)
       .then((resp) => {

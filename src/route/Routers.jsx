@@ -9,7 +9,7 @@ import Protected from "./Protected";
 import Logout from "../pages/auth/Logout";
 import Projects from "../pages/Projects";
 import Project from "../pages/Project";
-import Tasks from "../pages/Tasks111";
+import Tasks from "../pages/Tasks";
 import Task from "../pages/Task";
 import Invite from "../pages/Invite";
 import Loader from "../pages/loader/Loader";

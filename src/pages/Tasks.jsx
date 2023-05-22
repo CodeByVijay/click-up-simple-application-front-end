@@ -30,7 +30,6 @@ const Task = ({ task }) => {
   );
 };
 
-
 const Tasks = () => {
   const [showModal, setShowModal] = useState(false);
   const { users, userList, setUserList } = useContext(MainContextState);
@@ -171,6 +170,7 @@ const Tasks = () => {
         setTimeout(() => {
           setShowModal(false);
           setButtonTxt("Add Task");
+          getTaskList();
         }, 1500);
       })
       .catch((error) => {
@@ -182,7 +182,24 @@ const Tasks = () => {
     if (result.destination) {
       const task = taskList[result.source.index];
       task.status = result.destination.droppableId;
-      setTaskList([...taskList.filter((t, i) => i !== result.source.index), task]);
+      setTaskList([
+        ...taskList.filter((t, i) => i !== result.source.index),
+        task,
+      ]);
+
+      const statusData = {
+        task_id: task.id,
+        status: task.status,
+      };
+      axios
+        .post(`${base_path}task-status-change`, statusData)
+        .then((res) => {
+          console.log(res.data);
+          
+        })
+        .catch((error) => {
+          console.log(error.response.data.msg);
+        });
     }
   };
 
@@ -200,10 +217,10 @@ const Tasks = () => {
           </div>
 
           <div className="grid grid-cols-3 gap-3">
-           <Droppable droppableId="assigned">
+            <Droppable droppableId="assigned">
               {(provided, snapshot) => (
                 <div
-                  className={`assigned bg-yellow-100 rounded-md p-2 text-center h-full ${
+                  className={`assigned bg-yellow-100 rounded-md p-2 text-center h-screen ${
                     snapshot.isDraggingOver ? "bg-green-200" : ""
                   }`}
                   ref={provided.innerRef}
@@ -211,9 +228,32 @@ const Tasks = () => {
                 >
                   <div className="head my-3 font-semibold">Assigned Task</div>
                   <hr />
-                  {taskList.filter((task) => task.status === "assigned").map((task, index) => (
-                    <Task key={task.id} task={task} index={index} />
-                  ))}
+                  {taskList.map((task, index) => {
+                    return (
+                      task.status === "assigned" && (
+                        <Draggable
+                          key={task.id}
+                          draggableId={`assigned${task.id.toString()}`}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <Link to={`/task/${task.id}`}>
+                              <div
+                                className={`tasks my-2 p-3 bg-red-200 rounded-lg ${
+                                  snapshot.isDragging ? "opacity-50" : ""
+                                }`}
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                              >
+                                <h3>{task.task_name}</h3>
+                              </div>
+                            </Link>
+                          )}
+                        </Draggable>
+                      )
+                    );
+                  })}
                   {provided.placeholder}
                 </div>
               )}
@@ -222,17 +262,42 @@ const Tasks = () => {
             <Droppable droppableId="in-progress">
               {(provided, snapshot) => (
                 <div
-                  className={`in-progress bg-yellow-100 rounded-md p-2 text-center h-full ${
+                  className={`in-progress bg-green-100 rounded-md p-2 text-center h-screen ${
                     snapshot.isDraggingOver ? "bg-green-200" : ""
                   }`}
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                 >
-                  <div className="head my-3 font-semibold">In Progress Task</div>
+                  <div className="head my-3 font-semibold">
+                    In Progress Task
+                  </div>
                   <hr />
-                  {taskList.filter((task) => task.status === "in-progress").map((task, index) => (
-                    <Task key={task.id} task={task} index={index} />
-                  ))}
+                  {taskList.map((task, index) => {
+                    return (
+                      task.status === "in-progress" && (
+                        <Draggable
+                          key={task.id}
+                          draggableId={`in-progress${task.id.toString()}`}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <Link to={`/task/${task.id}`}>
+                              <div
+                                className={`tasks my-2 p-3 bg-yellow-200 rounded-lg ${
+                                  snapshot.isDragging ? "opacity-50" : ""
+                                }`}
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                              >
+                                <h3>{task.task_name}</h3>
+                              </div>
+                            </Link>
+                          )}
+                        </Draggable>
+                      )
+                    );
+                  })}
                   {provided.placeholder}
                 </div>
               )}
@@ -241,22 +306,46 @@ const Tasks = () => {
             <Droppable droppableId="completed">
               {(provided, snapshot) => (
                 <div
-                  className={`completed bg-yellow-100 rounded-md p-2 text-center h-full ${
+                  className={`completed bg-green-200 rounded-md p-2 text-center h-screen ${
                     snapshot.isDraggingOver ? "bg-green-200" : ""
                   }`}
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                 >
-                  <div className="head my-3 font-semibold">Completed Task</div>
+                  <div className="head my-3 font-semibold">
+                    In Progress Task
+                  </div>
                   <hr />
-                  {taskList.filter((task) => task.status === "completed").map((task, index) => (
-                    <Task key={task.id} task={task} index={index} />
-                  ))}
+                  {taskList.map((task, index) => {
+                    return (
+                      task.status === "completed" && (
+                        <Draggable
+                          key={task.id}
+                          draggableId={`completed${task.id.toString()}`}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <Link to={`/task/${task.id}`}>
+                              <div
+                                className={`tasks my-2 p-3 bg-green-500 rounded-lg ${
+                                  snapshot.isDragging ? "opacity-50" : ""
+                                }`}
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                              >
+                                <h3>{task.task_name}</h3>
+                              </div>
+                            </Link>
+                          )}
+                        </Draggable>
+                      )
+                    );
+                  })}
                   {provided.placeholder}
                 </div>
               )}
             </Droppable>
-
 
           </div>
 
