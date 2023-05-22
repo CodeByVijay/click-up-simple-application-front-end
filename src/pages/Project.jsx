@@ -131,6 +131,11 @@ const Project = () => {
       });
   };
   const handleAddMemberProject = (e) => {
+    if (selectedUserList.length === 0) {
+      setMsg("Please select members.");
+      setMsgColor("rose-600");
+      return false;
+    }
     e.preventDefault();
     setLoader(true);
 
@@ -281,7 +286,7 @@ const Project = () => {
 
                 <p className="my-2">
                   <span className="font-bold">Project Status : </span>
-                  {project[0]?.status ===0 ? "Pending":"Complete"}
+                  {project[0]?.status === 0 ? "Pending" : "Complete"}
                 </p>
               </div>
             </div>

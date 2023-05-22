@@ -194,8 +194,7 @@ const Tasks = () => {
       axios
         .post(`${base_path}task-status-change`, statusData)
         .then((res) => {
-          console.log(res.data);
-          
+          console.log(res.data.msg);
         })
         .catch((error) => {
           console.log(error.response.data.msg);
@@ -313,7 +312,7 @@ const Tasks = () => {
                   {...provided.droppableProps}
                 >
                   <div className="head my-3 font-semibold">
-                    In Progress Task
+                   Completed Task
                   </div>
                   <hr />
                   {taskList.map((task, index) => {

@@ -190,6 +190,11 @@ const Task = () => {
     setCommentText(e.target.value);
   };
   const handlePostComment = () => {
+    if(commentText === ""){
+      setMsg("Please write comment.");
+      setMsgColor("rose-700");
+      return false;
+    }
     setLoader(false);
     setLoader(true);
     const postData = {
