@@ -3,7 +3,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 import Layout from "../components/Layout";
 import { FaPlus } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Select from "react-select";
 import { MainContextState } from "../contexts/MainContext";
 import axios from "axios";
@@ -11,6 +11,7 @@ import { base_path } from "../App";
 
 const Task = ({ task }) => {
   const [isDragging, setIsDragging] = useState(false);
+
 
   return (
     <Draggable draggableId={task.id} isDragging={isDragging}>
@@ -31,6 +32,7 @@ const Task = ({ task }) => {
 };
 
 const Tasks = () => {
+  const { project_id } = useParams();
   const [showModal, setShowModal] = useState(false);
   const { users, userList, setUserList } = useContext(MainContextState);
   const [taskName, setTaskName] = useState("");
@@ -65,8 +67,9 @@ const Tasks = () => {
 
   // Get All Projects
   const getProjectList = () => {
+    // .get(`${base_path}all-projects`)
     axios
-      .get(`${base_path}all-projects`)
+      .get(`${base_path}member-projects/${users.id}`)
       .then((resp) => {
         // console.log(resp.data.result, "response");
         setProjectList(resp.data.result);
@@ -79,9 +82,9 @@ const Tasks = () => {
   // Get all task
   const getTaskList = () => {
     axios
-      .get(`${base_path}all-tasks`)
+      .get(`${base_path}project-tasks/${project_id}`)
       .then((resp) => {
-        // console.log(resp.data.result, "response");
+        console.log(resp.data.result, "response");
         setTaskList(resp.data.result);
       })
       .catch((error) => {
@@ -218,8 +221,9 @@ const Tasks = () => {
           <div className="grid grid-cols-3 gap-3">
             <Droppable droppableId="assigned">
               {(provided, snapshot) => (
+                // text-center h-screen
                 <div
-                  className={`assigned bg-yellow-100 rounded-md p-2 text-center h-screen ${
+                  className={`assigned bg-yellow-100 rounded-md p-2 ${
                     snapshot.isDraggingOver ? "bg-green-200" : ""
                   }`}
                   ref={provided.innerRef}
@@ -245,7 +249,14 @@ const Tasks = () => {
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
                               >
-                                <h3>{task.task_name}</h3>
+                                <h3 className="font-black">{task.task_name}</h3>
+                                <div className="flex justify-between">
+                                <h3>{task.description.slice(0,20)}...</h3>
+                                <span className={`uppercase text-white rounded-full w-10 text-center p-2 text-sm`} style={{backgroundColor:`#${Math.floor(Math.random()*16777215).toString(16)}`}}>{task.member_name.slice(0,2)}</span>
+                                </div>
+                                <div className="timeLine my-2">
+                                  <span className="font-bold">Timeline : </span> <span>{new Date(task.expected_date_time).toLocaleTimeString("en-US",{day:"numeric", year:"numeric", month:"short", hour: '2-digit', minute: '2-digit', hour12: true})}</span>
+                                </div>
                               </div>
                             </Link>
                           )}
@@ -261,7 +272,7 @@ const Tasks = () => {
             <Droppable droppableId="in-progress">
               {(provided, snapshot) => (
                 <div
-                  className={`in-progress bg-green-100 rounded-md p-2 text-center h-screen ${
+                  className={`in-progress bg-green-100 rounded-md p-2 ${
                     snapshot.isDraggingOver ? "bg-green-200" : ""
                   }`}
                   ref={provided.innerRef}
@@ -289,7 +300,16 @@ const Tasks = () => {
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
                               >
-                                <h3>{task.task_name}</h3>
+                                 <h3 className="font-bold">{task.task_name}</h3>
+                                <div className="flex justify-between">
+                                <h3>{task.description.slice(0,20)}...</h3>
+                                <span className={`uppercase text-white rounded-full w-10 text-center p-2 text-sm`} style={{backgroundColor:`#${Math.floor(Math.random()*16777215).toString(16)}`}}>{task.member_name.slice(0,2)}</span>
+                                </div>
+
+                                <div className="timeLine my-2">
+                                  <span className="font-bold">Timeline : </span> <span>{new Date(task.expected_date_time).toLocaleTimeString("en-US",{day:"numeric", year:"numeric", month:"short", hour: '2-digit', minute: '2-digit', hour12: true})}</span>
+                                </div>
+
                               </div>
                             </Link>
                           )}
@@ -305,7 +325,7 @@ const Tasks = () => {
             <Droppable droppableId="completed">
               {(provided, snapshot) => (
                 <div
-                  className={`completed bg-green-200 rounded-md p-2 text-center h-screen ${
+                  className={`completed bg-green-200 rounded-md p-2 ${
                     snapshot.isDraggingOver ? "bg-green-200" : ""
                   }`}
                   ref={provided.innerRef}
@@ -333,7 +353,16 @@ const Tasks = () => {
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
                               >
-                                <h3>{task.task_name}</h3>
+                                 <h3 className="font-bold">{task.task_name}</h3>
+                                <div className="flex justify-between">
+                                <h3>{task.description.slice(0,20)}...</h3>
+                                <span className={`uppercase text-white rounded-full w-10 text-center p-2 text-sm`} style={{backgroundColor:`#${Math.floor(Math.random()*16777215).toString(16)}`}}>{task.member_name.slice(0,2)}</span>
+                                </div>
+
+                                <div className="timeLine my-2">
+                                  <span className="font-bold">Timeline : </span> <span>{new Date(task.expected_date_time).toLocaleTimeString("en-US",{day:"numeric", year:"numeric", month:"short", hour: '2-digit', minute: '2-digit', hour12: true})}</span>
+                                </div>
+                                
                               </div>
                             </Link>
                           )}
@@ -372,14 +401,14 @@ const Tasks = () => {
                         value={taskName}
                       />
 
-                      <input
+                      <textarea
                         type="text"
                         id="Task_desc"
                         className="rounded-none rounded-r-lg mt-2 bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         placeholder="Task Description"
                         onChange={(e) => handleTaskDescription(e)}
                         value={taskDesc}
-                      />
+                      >{taskDesc}</textarea>
                       <Select
                         className="mt-2"
                         closeMenuOnSelect={true}

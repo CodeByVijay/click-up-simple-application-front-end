@@ -5,10 +5,11 @@ import Select from "react-select";
 import { MainContextState } from "../contexts/MainContext";
 import axios from "axios";
 import { app_url, base_path } from "../App";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Alert from "../components/Alert";
 
 const Projects = () => {
+  const navigate = useNavigate();
   const { users, userList, setUserList, msg, setMsg, msgColor, setMsgColor } =
     useContext(MainContextState);
 
@@ -17,6 +18,7 @@ const Projects = () => {
   const [projectDesc, setProjectDesc] = useState("");
   const [selectedUserList, setSelectedUserList] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  // console.log(users.id,"user id")
   useEffect(() => {
     //   Get all users
     axios
@@ -31,8 +33,9 @@ const Projects = () => {
   }, []);
 
   //   Get all projects
+  // /api/member-projects/:user_id
   axios
-    .get(`${base_path}all-projects`)
+    .get(`${base_path}member-projects/${users.id}`)
     .then((resp) => {
       setAllProjects(resp.data.result);
     })
@@ -107,6 +110,15 @@ const Projects = () => {
         setMsg(error.response.data.msg);
       });
   };
+  const handleProjectView = (e, projectId) => {
+    e.stopPropagation();
+    navigate(`/project/${projectId}`);
+  };
+
+  const handleViewTaskBoard = (e,projectId) => {
+    e.stopPropagation();
+    navigate(`/task-list/${projectId}`)
+  };
 
   return (
     <>
@@ -131,7 +143,11 @@ const Projects = () => {
                   <>
                     {val.status === 0 ? (
                       <>
-                        <Link key={i} to={`/project/${val.id}`}>
+                        <div
+                          className="cursor-pointer"
+                          key={i}
+                          onClick={(e) => handleProjectView(e, val.id)}
+                        >
                           <div className="m-2 bg-gray-100 border-2 border-gray-200 p-3 hover:bg-blue-200 h-full overflow-hidden">
                             <div className="text-center">
                               {/* <span className="float-right text-rose-700 px-2 mx-2 cursor-pointer hover:text-lg">
@@ -162,12 +178,26 @@ const Projects = () => {
                                 </div>
                               </div>
                             </div>
+
+                            <div className="viewBoard mt-4">
+                              <span className="text-center">
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleViewTaskBoard(e,val.id)}
+                                  className="px-2 py-3 bg-blue-400 rounded-lg text-white w-full hover:bg-blue-500"
+                                >
+                                  View Board
+                                </button>
+                              </span>
+                            </div>
                           </div>
-                        </Link>
+                        </div>
                       </>
                     ) : (
                       <>
-                        <Link to={`/project/${val.id}`}>
+                        <div className="cursor-pointer"
+                          key={i-1}
+                          onClick={(e) => handleProjectView(e, val.id)}>
                           <div className="m-2 bg-green-100 border-2 border-gray-200 p-3 hover:bg-green-300 overflow-hidden h-full">
                             <div className="text-center">
                               {/* <span className="float-right text-rose-700 px-2 mx-2 cursor-pointer hover:text-lg">
@@ -198,8 +228,21 @@ const Projects = () => {
                                 </div>
                               </div>
                             </div>
+
+                            <div className="viewBoard mt-4">
+                              <span className="text-center">
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleViewTaskBoard(e,val.id)}
+                                  className="px-2 py-3 bg-blue-400 rounded-lg text-white w-full hover:bg-blue-500"
+                                >
+                                  View Board
+                                </button>
+                              </span>
+                            </div>
+
                           </div>
-                        </Link>
+                        </div>
                       </>
                     )}
                   </>

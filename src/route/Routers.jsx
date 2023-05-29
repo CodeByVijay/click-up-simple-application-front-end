@@ -24,7 +24,7 @@ const Routers = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/projects" exact element={<Projects />} />
           <Route path="/project/:id" element={<Project />} />
-          <Route path="/task-list" element={<Tasks />} />
+          <Route path="/task-list/:project_id" element={<Tasks />} />
           <Route path="/task/:id" element={<Task />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/logout" element={<Logout />} />

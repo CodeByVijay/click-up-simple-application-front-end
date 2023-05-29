@@ -341,17 +341,6 @@ const Task = () => {
                     <div className="grid grid-cols-2 my-2">
                       <div>
                         <label className="font-black">
-                          Task Description :{" "}
-                        </label>
-                      </div>
-                      <div>
-                        <span>{task[0].task_desc}</span>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 my-2">
-                      <div>
-                        <label className="font-black">
                           Expected Date & Time :
                         </label>
                       </div>
@@ -386,6 +375,18 @@ const Task = () => {
                         <span className="capitalize">{task[0].status}</span>
                       </div>
                     </div>
+
+                    <div className="grid grid-cols-2 my-2">
+                      <div>
+                        <label className="font-black">
+                          Task Description :{" "}
+                        </label>
+                      </div>
+                      <div>
+                        <span>{task[0].task_desc}</span>
+                      </div>
+                    </div>
+                    
                     <div className="grid grid-cols-1 my-2">
                       <div>
                         <label className="font-black">Comments : </label>
@@ -403,14 +404,9 @@ const Task = () => {
                             <div className="flex p-2 m-4 justify-between">
                               <div className="userName flex">
                                 <div className="avatar rounded-xl shadow-xl shadow-blue-800">
-                                  <img
-                                    src={userImage}
-                                    alt=""
-                                    width={`48px`}
-                                    height={`48px`}
-                                  />
+                                <span className={`uppercase text-white rounded-full w-10 text-center p-2 text-sm`} style={{backgroundColor:`#${Math.floor(Math.random()*16777215).toString(16)}`}}>{val.user_name.slice(0,2)}</span>
                                 </div>
-                                <div className="name mt-4 ml-4 font-medium">
+                                <div className="name ml-4 font-medium">
                                   <p>{val.user_name}</p>
                                 </div>
                               </div>
