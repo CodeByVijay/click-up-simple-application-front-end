@@ -37,6 +37,7 @@ const Projects = () => {
   axios
     .get(`${base_path}member-projects/${users.id}`)
     .then((resp) => {
+      //  console.log(resp.data.result, "response");
       setAllProjects(resp.data.result);
     })
     .catch((error) => {
@@ -217,6 +218,14 @@ const Projects = () => {
                                     {val.members !== null
                                       ? JSON.parse(val.members).length
                                       : 0}
+                                      {/* members */}
+                                      {val.members !== null?(
+                                        <>
+                                        {val.members.map((mem,i)=>{
+                                          console.log(mem,"member")
+                                        })}
+                                        </>
+                                      ):''}
                                   </p>
                                 </div>
                                 <div className="manager">

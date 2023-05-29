@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, {useRef, useContext, useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 import Layout from "../components/Layout";
@@ -33,6 +33,11 @@ const Task = ({ task }) => {
 
 const Tasks = () => {
   const { project_id } = useParams();
+
+  const elRef = useRef();
+  const [height, setHeight] = useState(0);
+
+
   const [showModal, setShowModal] = useState(false);
   const { users, userList, setUserList } = useContext(MainContextState);
   const [taskName, setTaskName] = useState("");
@@ -51,7 +56,20 @@ const Tasks = () => {
     getUserList();
     getProjectList();
     getTaskList();
+
+    if (!elRef?.current?.offsetHeight) {
+      return false;
+    }
+    setHeight(elRef?.current?.offsetHeight);
   }, []);
+  console.log(height,"height")
+  const heightStyle = {
+    height: `calc(100vh - ${
+      height
+    }px)`,
+    
+  }
+  console.log(heightStyle,"heightStyle")
   //   Get all users
   const getUserList = () => {
     axios
@@ -84,7 +102,6 @@ const Tasks = () => {
     axios
       .get(`${base_path}project-tasks/${project_id}`)
       .then((resp) => {
-        console.log(resp.data.result, "response");
         setTaskList(resp.data.result);
       })
       .catch((error) => {
@@ -218,7 +235,7 @@ const Tasks = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-3" ref={elRef}>
             <Droppable droppableId="assigned">
               {(provided, snapshot) => (
                 // text-center h-screen
@@ -228,6 +245,7 @@ const Tasks = () => {
                   }`}
                   ref={provided.innerRef}
                   {...provided.droppableProps}
+                  style={heightStyle}
                 >
                   <div className="head my-3 font-semibold">Assigned Task</div>
                   <hr />
@@ -277,6 +295,7 @@ const Tasks = () => {
                   }`}
                   ref={provided.innerRef}
                   {...provided.droppableProps}
+                  style={heightStyle}
                 >
                   <div className="head my-3 font-semibold">
                     In Progress Task
@@ -330,6 +349,7 @@ const Tasks = () => {
                   }`}
                   ref={provided.innerRef}
                   {...provided.droppableProps}
+                  style={heightStyle}
                 >
                   <div className="head my-3 font-semibold">
                    Completed Task
@@ -362,7 +382,7 @@ const Tasks = () => {
                                 <div className="timeLine my-2">
                                   <span className="font-bold">Timeline : </span> <span>{new Date(task.expected_date_time).toLocaleTimeString("en-US",{day:"numeric", year:"numeric", month:"short", hour: '2-digit', minute: '2-digit', hour12: true})}</span>
                                 </div>
-                                
+
                               </div>
                             </Link>
                           )}
