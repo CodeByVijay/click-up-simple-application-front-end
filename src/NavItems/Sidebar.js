@@ -12,6 +12,7 @@ import HamburgerButton from '../components/HamburgerMenuButton/HamburgerButton'
 
 const Sidebar = () => {
   const [open, setOpen] = useState(true)
+  const [projectName, setProjectName] = useState("Smart Strategies")
   const [mobileMenu, setMobileMenu] = useState(false)
   const location = useLocation()
 
@@ -38,10 +39,11 @@ const Sidebar = () => {
         />
         <Link to='/login'>
           <div className={`flex ${open && 'gap-x-4'} items-center`}>
-            <img src={Logo} alt='' className='pl-2' />
+            {/* <img src={Logo} alt='' className='pl-2' /> */}
+            <span className='bg-blue-600 rounded-full py-2 px-3 font-bold text-white'>{projectName.match(/[A-Z]/g).join('')}</span>
             {open && (
-              <span className='text-xl font-medium whitespace-nowrap dark:text-white'>
-                Click UP
+              <span className='text-lg font-medium whitespace-nowrap dark:text-white'>
+              {projectName}
               </span>
             )}
           </div>
@@ -52,7 +54,7 @@ const Sidebar = () => {
             <Link to={menu.path} key={index}>
               <li
                 className={`flex items-center gap-x-6 p-3 text-base font-normal rounded-lg cursor-pointer dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700
-                        ${menu.gap ? 'mt-9' : 'mt-2'} ${
+                        ${menu.gap ? 'mt-8 border-t-2 border-gray-400 dark:border-white rounded-none' : 'mt-2'} ${
                   location.pathname === menu.path &&
                   'bg-gray-200 dark:bg-gray-700'
                 }`}

@@ -1,4 +1,4 @@
-import React, {useRef, useContext, useEffect, useState } from "react";
+import React, { useRef, useContext, useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 import Layout from "../components/Layout";
@@ -11,7 +11,6 @@ import { base_path } from "../App";
 
 const Task = ({ task }) => {
   const [isDragging, setIsDragging] = useState(false);
-
 
   return (
     <Draggable draggableId={task.id} isDragging={isDragging}>
@@ -37,7 +36,6 @@ const Tasks = () => {
   const elRef = useRef();
   const [height, setHeight] = useState(0);
 
-
   const [showModal, setShowModal] = useState(false);
   const { users, userList, setUserList } = useContext(MainContextState);
   const [taskName, setTaskName] = useState("");
@@ -62,14 +60,13 @@ const Tasks = () => {
     }
     setHeight(elRef?.current?.offsetHeight);
   }, []);
-  console.log(height,"height")
+  console.log(height, "height");
   const heightStyle = {
-    height: `calc(100vh - ${
-      height
-    }px)`,
-    
-  }
-  console.log(heightStyle,"heightStyle")
+    height: `calc(100vh - 168px)`,
+    overflowY:"scroll",
+  };
+
+  // console.log(heightStyle, "heightStyle");
   //   Get all users
   const getUserList = () => {
     axios
@@ -231,16 +228,16 @@ const Tasks = () => {
               className="flex gap-2 bg-green-600 hover:bg-green-700 text-white hover:text-gray-50 rounded-md p-3 m-2"
               onClick={handleModelOpen}
             >
-              <FaPlus className="mt-1" /> Add New Task
+              <FaPlus className="mt-1"/> Add New Task
             </button>
           </div>
 
-          <div className="grid grid-cols-3 gap-3" ref={elRef}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-3" ref={elRef}>
             <Droppable droppableId="assigned">
               {(provided, snapshot) => (
                 // text-center h-screen
                 <div
-                  className={`assigned bg-yellow-100 rounded-md p-2 ${
+                  className={`assigned taskListBlock bg-yellow-100 rounded-md p-2 ${
                     snapshot.isDraggingOver ? "bg-green-200" : ""
                   }`}
                   ref={provided.innerRef}
@@ -269,11 +266,32 @@ const Tasks = () => {
                               >
                                 <h3 className="font-black">{task.task_name}</h3>
                                 <div className="flex justify-between">
-                                <h3>{task.description.slice(0,20)}...</h3>
-                                <span className={`uppercase text-white rounded-full w-10 text-center p-2 text-sm`} style={{backgroundColor:`#${Math.floor(Math.random()*16777215).toString(16)}`}}>{task.member_name.slice(0,2)}</span>
+                                  <h3>{task.description.slice(0, 20)}...</h3>
+                                  <span
+                                    className={`uppercase text-white rounded-full w-10 text-center p-2 text-sm`}
+                                    style={{
+                                      backgroundColor: `#${Math.floor(
+                                        Math.random() * 16777215
+                                      ).toString(16)}`,
+                                    }}
+                                  >
+                                    {task.member_name.slice(0, 2)}
+                                  </span>
                                 </div>
                                 <div className="timeLine my-2">
-                                  <span className="font-bold">Timeline : </span> <span>{new Date(task.expected_date_time).toLocaleTimeString("en-US",{day:"numeric", year:"numeric", month:"short", hour: '2-digit', minute: '2-digit', hour12: true})}</span>
+                                  <span className="font-bold">Timeline : </span>{" "}
+                                  <span>
+                                    {new Date(
+                                      task.expected_date_time
+                                    ).toLocaleTimeString("en-US", {
+                                      day: "numeric",
+                                      year: "numeric",
+                                      month: "short",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                      hour12: true,
+                                    })}
+                                  </span>
                                 </div>
                               </div>
                             </Link>
@@ -290,7 +308,7 @@ const Tasks = () => {
             <Droppable droppableId="in-progress">
               {(provided, snapshot) => (
                 <div
-                  className={`in-progress bg-green-100 rounded-md p-2 ${
+                  className={`in-progress taskListBlock bg-green-100 rounded-md p-2 ${
                     snapshot.isDraggingOver ? "bg-green-200" : ""
                   }`}
                   ref={provided.innerRef}
@@ -319,16 +337,36 @@ const Tasks = () => {
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
                               >
-                                 <h3 className="font-bold">{task.task_name}</h3>
+                                <h3 className="font-bold">{task.task_name}</h3>
                                 <div className="flex justify-between">
-                                <h3>{task.description.slice(0,20)}...</h3>
-                                <span className={`uppercase text-white rounded-full w-10 text-center p-2 text-sm`} style={{backgroundColor:`#${Math.floor(Math.random()*16777215).toString(16)}`}}>{task.member_name.slice(0,2)}</span>
+                                  <h3>{task.description.slice(0, 20)}...</h3>
+                                  <span
+                                    className={`uppercase text-white rounded-full w-10 text-center p-2 text-sm`}
+                                    style={{
+                                      backgroundColor: `#${Math.floor(
+                                        Math.random() * 16777215
+                                      ).toString(16)}`,
+                                    }}
+                                  >
+                                    {task.member_name.slice(0, 2)}
+                                  </span>
                                 </div>
 
                                 <div className="timeLine my-2">
-                                  <span className="font-bold">Timeline : </span> <span>{new Date(task.expected_date_time).toLocaleTimeString("en-US",{day:"numeric", year:"numeric", month:"short", hour: '2-digit', minute: '2-digit', hour12: true})}</span>
+                                  <span className="font-bold">Timeline : </span>{" "}
+                                  <span>
+                                    {new Date(
+                                      task.expected_date_time
+                                    ).toLocaleTimeString("en-US", {
+                                      day: "numeric",
+                                      year: "numeric",
+                                      month: "short",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                      hour12: true,
+                                    })}
+                                  </span>
                                 </div>
-
                               </div>
                             </Link>
                           )}
@@ -344,16 +382,14 @@ const Tasks = () => {
             <Droppable droppableId="completed">
               {(provided, snapshot) => (
                 <div
-                  className={`completed bg-green-200 rounded-md p-2 ${
+                  className={`completed taskListBlock bg-green-200 rounded-md p-2 ${
                     snapshot.isDraggingOver ? "bg-green-200" : ""
                   }`}
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                   style={heightStyle}
                 >
-                  <div className="head my-3 font-semibold">
-                   Completed Task
-                  </div>
+                  <div className="head my-3 font-semibold">Completed Task</div>
                   <hr />
                   {taskList.map((task, index) => {
                     return (
@@ -373,16 +409,36 @@ const Tasks = () => {
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
                               >
-                                 <h3 className="font-bold">{task.task_name}</h3>
+                                <h3 className="font-bold">{task.task_name}</h3>
                                 <div className="flex justify-between">
-                                <h3>{task.description.slice(0,20)}...</h3>
-                                <span className={`uppercase text-white rounded-full w-10 text-center p-2 text-sm`} style={{backgroundColor:`#${Math.floor(Math.random()*16777215).toString(16)}`}}>{task.member_name.slice(0,2)}</span>
+                                  <h3>{task.description.slice(0, 20)}...</h3>
+                                  <span
+                                    className={`uppercase text-white rounded-full w-10 text-center p-2 text-sm`}
+                                    style={{
+                                      backgroundColor: `#${Math.floor(
+                                        Math.random() * 16777215
+                                      ).toString(16)}`,
+                                    }}
+                                  >
+                                    {task.member_name.slice(0, 2)}
+                                  </span>
                                 </div>
 
                                 <div className="timeLine my-2">
-                                  <span className="font-bold">Timeline : </span> <span>{new Date(task.expected_date_time).toLocaleTimeString("en-US",{day:"numeric", year:"numeric", month:"short", hour: '2-digit', minute: '2-digit', hour12: true})}</span>
+                                  <span className="font-bold">Timeline : </span>{" "}
+                                  <span>
+                                    {new Date(
+                                      task.expected_date_time
+                                    ).toLocaleTimeString("en-US", {
+                                      day: "numeric",
+                                      year: "numeric",
+                                      month: "short",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                      hour12: true,
+                                    })}
+                                  </span>
                                 </div>
-
                               </div>
                             </Link>
                           )}
@@ -394,7 +450,6 @@ const Tasks = () => {
                 </div>
               )}
             </Droppable>
-
           </div>
 
           {showModal && (
@@ -428,7 +483,9 @@ const Tasks = () => {
                         placeholder="Task Description"
                         onChange={(e) => handleTaskDescription(e)}
                         value={taskDesc}
-                      >{taskDesc}</textarea>
+                      >
+                        {taskDesc}
+                      </textarea>
                       <Select
                         className="mt-2"
                         closeMenuOnSelect={true}
